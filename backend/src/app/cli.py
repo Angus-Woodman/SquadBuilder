@@ -1,8 +1,10 @@
 import argparse
+import json
 
 from dotenv import load_dotenv
 
 from app.ingest.fetch import fetch_teams_from_league
+from app.ingest.transform import transform_many_competitions
 
 
 def main() -> None:
@@ -27,8 +29,17 @@ def main() -> None:
         results = {}
         for comp in args.competition:
             results[comp] = fetch_teams_from_league(comp)
+        raw = results  # dict[str, dict]
+        transformed = transform_many_competitions(raw)
+        print(json.dumps(transformed["counts"], indent=2))
 
-        # print(json.dumps(results, indent=2))
+        english_players = [
+            p
+            for p in transformed["players"]
+            if (p.get("nationality") or "").strip().lower() == "england"
+        ]
+        for p in english_players:
+            print(f"{p['player_id']}: {p.get('name')} ({p.get('position')})")
 
 
 if __name__ == "__main__":
