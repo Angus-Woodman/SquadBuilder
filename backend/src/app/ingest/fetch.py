@@ -8,7 +8,7 @@ BASE = "https://api.football-data.org/v4"
 
 def fetch_teams_from_league(league: str) -> dict[str, Any]:
     token = os.getenv("FOOTBALL_DATA_API_TOKEN")
-    league.strip().upper()
+    league = league.strip().upper()
     API_URL = f"{BASE}/competitions/{league}/teams"
     if not token:
         raise RuntimeError(
