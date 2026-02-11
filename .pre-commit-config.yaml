@@ -1,0 +1,27 @@
+repos:
+  # Basic hygiene hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+
+  # Ruff lint + formatter (fast, modern)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # Block committing pyc/__pycache__/egg-info anywhere in the repo
+  - repo: local
+    hooks:
+      - id: forbid-python-build-artifacts
+        name: Forbid Python cache/build artifacts
+        entry: bash -c 'git diff --cached --name-only | grep -E "(__pycache__/|\.pyc$|\.pyo$|\.egg-info/)" && echo "Remove Python cache/build artifacts from commit." && exit 1 || exit 0'
+        language: system
+        pass_filenames: false

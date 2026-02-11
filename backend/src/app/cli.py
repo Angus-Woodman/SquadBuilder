@@ -1,6 +1,6 @@
-import json
-from dotenv import load_dotenv
 import argparse
+
+from dotenv import load_dotenv
 
 from app.ingest.fetch import fetch_teams_from_league
 

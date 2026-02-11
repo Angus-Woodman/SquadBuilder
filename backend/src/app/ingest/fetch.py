@@ -1,12 +1,12 @@
 import os
-from typing import Any, Dict
+from typing import Any
 
 import requests
 
 BASE = "https://api.football-data.org/v4"
 
 
-def fetch_teams_from_league(league: str) -> Dict[str, Any]:
+def fetch_teams_from_league(league: str) -> dict[str, Any]:
     token = os.getenv("FOOTBALL_DATA_API_TOKEN")
     league.strip().upper()
     API_URL = f"{BASE}/competitions/{league}/teams"
