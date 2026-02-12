@@ -13,3 +13,6 @@ backend-format:
 
 backend-test:
 	cd $(BACKEND_DIR) && uv run pytest -q
+
+backend-api:
+	cd backend && uv run uvicorn app.api.main:app --reload
