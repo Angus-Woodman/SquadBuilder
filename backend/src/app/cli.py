@@ -1,21 +1,19 @@
 import argparse
-import json
+from pathlib import Path
 
 from dotenv import load_dotenv
-
-from app.ingest.fetch import fetch_teams_from_league
-from app.ingest.transform import transform_many_competitions
 
 
 def main() -> None:
     # Loads backend/.env into environment variables for local runs
-    load_dotenv()
+    backend_dir = Path(__file__).resolve().parents[2]  # .../backend
+    load_dotenv(backend_dir / ".env")
 
     parser = argparse.ArgumentParser(prog="app")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    fetch = sub.add_parser("fetch", help="Fetch teams for a competition code (e.g. PL)")
-    fetch.add_argument(
+    refresh = sub.add_parser("refresh", help="Fetch, transform, and upsert players into Postgres")
+    refresh.add_argument(
         "--competition",
         "-c",
         nargs="+",
@@ -23,23 +21,32 @@ def main() -> None:
         help="Competition code(s) to fetch teams for. e.g. PL BL1 SA PD FL1",
     )
 
+    list_cmd = sub.add_parser("list", help="List players from the database")
+    list_cmd.add_argument("--nationality", "-n", default=None)
+
     args = parser.parse_args()
 
-    if args.command == "fetch":
-        results = {}
-        for comp in args.competition:
-            results[comp] = fetch_teams_from_league(comp)
-        raw = results  # dict[str, dict]
-        transformed = transform_many_competitions(raw)
-        print(json.dumps(transformed["counts"], indent=2))
+    if args.command == "refresh":
+        from app.db.bootstrap import create_tables
+        from app.db.store import upsert_players
+        from app.ingest.fetch import fetch_teams_from_league
+        from app.ingest.transform import transform_many_competitions
 
-        english_players = [
-            p
-            for p in transformed["players"]
-            if (p.get("nationality") or "").strip().lower() == "england"
-        ]
-        for p in english_players:
-            print(f"{p['player_id']}: {p.get('name')} ({p.get('position')})")
+        create_tables()
+
+        raw = {c: fetch_teams_from_league(c) for c in args.competition}
+        transformed = transform_many_competitions(raw)
+
+        inserted = upsert_players(transformed["players"])
+        print(f"Upserted {inserted} player rows")
+
+    elif args.command == "list":
+        from app.db.queries import list_players
+
+        players = list_players(args.nationality)
+        for p in players[:50]:
+            print(f"{p.player_id}: {p.name} ({p.position}) [{p.nationality}]")
+        print(f"Total: {len(players)}")
 
 
 if __name__ == "__main__":
