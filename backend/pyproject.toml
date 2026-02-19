@@ -17,6 +17,7 @@ dependencies = [
 dev = [
     "pre-commit>=4.5.1",
     "pytest>=9.0.2",
+    "pytest-sugar>=1.1.1",
     "ruff>=0.15.0",
 ]
 
@@ -42,3 +43,7 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-v --durations=10"
+testpaths = ["tests"]
