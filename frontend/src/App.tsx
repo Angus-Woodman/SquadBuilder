@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 
 import { fetchPlayers, refreshData } from "./api/client";
+import { LandingPage } from "./components/LandingPage";
 import { PlayerFilters } from "./components/PlayerFilters";
 import { PlayerTable } from "./components/PlayerTable";
 import { SquadPanel } from "./components/SquadPanel";
@@ -16,6 +17,9 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [posFilter, setPosFilter] = useState<PositionGroup | "ALL">("ALL");
   const [limit, setLimit] = useState(400);
+
+  // Page
+  const [page, setPage] = useState<"landing" | "builder">("landing");
 
   // Data
   const [allPlayers, setAllPlayers] = useState<Player[]>([]);
@@ -97,11 +101,16 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nationality, limit]);
 
+  if (page === "landing") {
+    return <LandingPage onStart={() => setPage("builder")} />;
+  }
+
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: 24 }}>
       <header style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
-        <h1 style={{ margin: 0 }}>England World Cup Squad Selector</h1>
-        <div style={{ opacity: 0.75 }}>Pretend you’re Thomas Tuchel!</div>
+        <button className="back-btn" onClick={() => setPage("landing")}>← Back</button>
+        <h1 style={{ margin: 0, flex: 1 }}>Squad Selector</h1>
+        <div style={{ opacity: 0.75 }}>26-player World Cup squad</div>
       </header>
 
       <div style={{ marginTop: 16, marginBottom: 16 }}>
