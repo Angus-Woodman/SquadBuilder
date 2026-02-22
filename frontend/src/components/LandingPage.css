@@ -1,59 +1,9 @@
-/* ── Landing page ───────────────────────────────────── */
+/* ── Landing page (within dashboard shell) ──────────── */
 .landing {
   height: 100vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-/* ── Nav ─────────────────────────────────────────────── */
-.landing-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 32px;
-  flex-shrink: 0;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  background: rgba(36, 36, 36, 0.7);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-@media (prefers-color-scheme: light) {
-  .landing-nav {
-    background: rgba(255, 255, 255, 0.75);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  }
-}
-
-.landing-nav-brand {
-  font-weight: 700;
-  font-size: 1.05rem;
-  letter-spacing: -0.02em;
-}
-
-.login-btn {
-  padding: 7px 18px;
-  font-size: 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-  background: transparent;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
-}
-.login-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-@media (prefers-color-scheme: light) {
-  .login-btn {
-    border-color: rgba(0, 0, 0, 0.15);
-  }
-  .login-btn:hover {
-    background: rgba(0, 0, 0, 0.04);
-    border-color: rgba(0, 0, 0, 0.3);
-  }
 }
 
 /* ── Hero ────────────────────────────────────────────── */
@@ -87,7 +37,7 @@
 }
 
 .hero-highlight {
-  background: linear-gradient(135deg, #646cff 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -111,14 +61,14 @@
   border: none;
   border-radius: 12px;
   color: #fff;
-  background: linear-gradient(135deg, #646cff 0%, #7c5ce7 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.2s;
-  box-shadow: 0 4px 24px rgba(100, 108, 255, 0.35);
+  box-shadow: 0 4px 24px rgba(59, 130, 246, 0.35);
 }
 .cta-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 32px rgba(100, 108, 255, 0.5);
+  box-shadow: 0 6px 32px rgba(59, 130, 246, 0.5);
   border-color: transparent;
   color: #fff;
 }
@@ -155,16 +105,6 @@
   border-color: rgba(255, 255, 255, 0.15);
 }
 
-@media (prefers-color-scheme: light) {
-  .stat-card {
-    border-color: rgba(0, 0, 0, 0.08);
-    background: rgba(0, 0, 0, 0.02);
-  }
-  .stat-card:hover {
-    border-color: rgba(0, 0, 0, 0.18);
-  }
-}
-
 .stat-icon {
   font-size: 1.4rem;
 }
@@ -192,7 +132,20 @@
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.landing-footer a {
+  color: inherit;
+}
+
+/* ── Light mode ──────────────────────────────────────── */
 @media (prefers-color-scheme: light) {
+  .stat-card {
+    border-color: rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.02);
+  }
+  .stat-card:hover {
+    border-color: rgba(0, 0, 0, 0.18);
+  }
+
   .landing-footer {
     border-top-color: rgba(0, 0, 0, 0.06);
   }

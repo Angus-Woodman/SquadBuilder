@@ -1,0 +1,398 @@
+/* ── Dashboard pages (squads, friends) ────────────────────────────── */
+
+.dashboard-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #f1f5f9;
+}
+
+/* Nav */
+.dashboard-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 2rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.dashboard-brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #f1f5f9;
+  text-decoration: none;
+}
+
+.dashboard-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.dashboard-nav-links a {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.dashboard-nav-links a:hover,
+.dashboard-nav-links a.active {
+  color: #f1f5f9;
+}
+
+.dashboard-user {
+  color: #60a5fa;
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+  padding-left: 1rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Content area */
+.dashboard-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.dashboard-content--wide {
+  max-width: 1200px;
+}
+
+.dashboard-content h1 {
+  margin: 0 0 1.5rem;
+  font-size: 1.75rem;
+}
+
+/* Logout / login button in nav */
+.dashboard-logout {
+  padding: 5px 14px;
+  font-size: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.dashboard-logout:hover {
+  color: #f1f5f9;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dashboard-info {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.dashboard-error {
+  color: #f87171;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(248, 113, 113, 0.1);
+  border-radius: 6px;
+  margin-top: 0.5rem;
+}
+
+.dashboard-success {
+  color: #34d399;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(52, 211, 153, 0.1);
+  border-radius: 6px;
+  margin-top: 0.5rem;
+}
+
+.dashboard-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.dashboard-empty p {
+  color: #94a3b8;
+  margin-bottom: 1rem;
+}
+
+.dashboard-cta {
+  display: inline-block;
+  padding: 0.6rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: #fff;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Squad cards grid */
+.squad-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.squad-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.squad-card-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+}
+
+.squad-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.squad-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.squad-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.squad-card-meta {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  margin: 0.5rem 0 0;
+}
+
+.squad-card-delete {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+
+.squad-card-delete:hover {
+  color: #f87171;
+}
+
+/* ── Friends page ─────────────────────────────────────────────────── */
+
+.friend-add-form {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.friend-add-form input {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f1f5f9;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.friend-add-form input:focus {
+  border-color: #3b82f6;
+}
+
+.friend-add-form button {
+  padding: 0.6rem 1.25rem;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.friend-section {
+  margin-top: 1.5rem;
+}
+
+.friend-section h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.75rem;
+  color: #cbd5e1;
+}
+
+.friend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+
+.friend-row strong {
+  color: #f1f5f9;
+}
+
+.friend-email {
+  color: #64748b;
+  font-size: 0.8rem;
+  margin-left: 0.75rem;
+}
+
+.friend-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.friend-actions button {
+  padding: 0.35rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.2s;
+}
+
+.friend-actions button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.accept-btn {
+  background: rgba(52, 211, 153, 0.15) !important;
+  border-color: rgba(52, 211, 153, 0.3) !important;
+  color: #34d399 !important;
+}
+
+.remove-btn {
+  background: rgba(248, 113, 113, 0.1) !important;
+  border-color: rgba(248, 113, 113, 0.2) !important;
+  color: #f87171 !important;
+}
+
+.friend-pending-badge {
+  font-size: 0.75rem;
+  color: #fbbf24;
+  padding: 0.2rem 0.6rem;
+  background: rgba(251, 191, 36, 0.1);
+  border-radius: 4px;
+}
+
+/* Friend squads overlay */
+.friend-squads-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 2rem;
+}
+
+.friend-squads-panel {
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.friend-squads-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.friend-squads-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.friend-squads-header button {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 1.25rem;
+}
+
+/* ── Light mode ───────────────────────────────────────────────────── */
+@media (prefers-color-scheme: light) {
+  .dashboard-page {
+    background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
+    color: #0f172a;
+  }
+
+  .dashboard-nav {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .dashboard-brand {
+    color: #0f172a;
+  }
+
+  .dashboard-nav-links a {
+    color: #64748b;
+  }
+
+  .dashboard-nav-links a:hover,
+  .dashboard-nav-links a.active {
+    color: #0f172a;
+  }
+
+  .dashboard-user {
+    color: #3b82f6;
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .squad-card {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .friend-row {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .friend-add-form input {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: #0f172a;
+  }
+
+  .friend-actions button {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #334155;
+  }
+
+  .friend-squads-panel {
+    background: #f8fafc;
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .friend-squads-header button {
+    color: #64748b;
+  }
+}

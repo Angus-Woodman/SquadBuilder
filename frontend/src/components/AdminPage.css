@@ -1,0 +1,410 @@
+/* ── Admin page styles ────────────────────────────────────────────── */
+
+.admin-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.75rem;
+}
+
+.admin-tabs button {
+  padding: 0.5rem 1rem;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s, background 0.2s;
+}
+
+.admin-tabs button:hover {
+  color: #f1f5f9;
+}
+
+.admin-tabs button.active {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  border-bottom-color: transparent;
+}
+
+/* Section */
+.admin-section {
+  margin-top: 0.5rem;
+}
+
+.admin-section h2 {
+  font-size: 1.1rem;
+  margin: 0 0 1rem;
+  color: #cbd5e1;
+}
+
+.admin-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.admin-section-header h2 {
+  margin: 0;
+}
+
+.admin-header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.admin-import-btn {
+  padding: 0.5rem 1.25rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.admin-import-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.admin-save-btn {
+  padding: 0.5rem 1.25rem;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.admin-save-btn:hover {
+  opacity: 0.9;
+}
+
+.admin-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Search */
+.admin-search-box {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.admin-search-box input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f1f5f9;
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.admin-search-box input:focus {
+  border-color: #3b82f6;
+}
+
+.admin-search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0 0 8px 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.admin-search-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.15s;
+}
+
+.admin-search-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.admin-search-row.in-list {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.admin-search-pos {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.admin-search-action {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.admin-search-row.in-list .admin-search-action {
+  color: #f87171;
+}
+
+/* List */
+.admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.admin-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.admin-list-meta {
+  color: #64748b;
+  font-size: 0.8rem;
+  margin-left: 0.75rem;
+}
+
+.admin-list-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-remove-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0 0.25rem;
+}
+
+.admin-remove-btn:hover {
+  color: #f87171;
+}
+
+/* Role badges */
+.role-badge {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.role-badge.admin {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.12);
+}
+
+.role-badge.user {
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.admin-role-btn {
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #cbd5e1;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background 0.2s;
+}
+
+.admin-role-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Delete button */
+.admin-delete-btn {
+  background: none;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.admin-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* Add user form */
+.admin-add-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.admin-add-form input,
+.admin-add-form select {
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f1f5f9;
+  font-size: 0.85rem;
+  outline: none;
+  flex: 1;
+  min-width: 120px;
+}
+
+.admin-add-form input:focus,
+.admin-add-form select:focus {
+  border-color: #3b82f6;
+}
+
+.admin-add-form select {
+  flex: 0 0 auto;
+  min-width: 90px;
+}
+
+/* Player edit row */
+.admin-edit-row {
+  padding: 0.75rem;
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+}
+
+.admin-edit-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.admin-edit-fields label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  gap: 0.2rem;
+}
+
+.admin-edit-fields input {
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f1f5f9;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.admin-edit-fields input:focus {
+  border-color: #3b82f6;
+}
+
+.admin-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* ── Light mode ───────────────────────────────────────────────────── */
+@media (prefers-color-scheme: light) {
+  .admin-tabs {
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .admin-tabs button {
+    color: #64748b;
+  }
+
+  .admin-tabs button:hover {
+    color: #0f172a;
+  }
+
+  .admin-tabs button.active {
+    color: #0f172a;
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .admin-search-box input {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: #0f172a;
+  }
+
+  .admin-search-results {
+    background: #f8fafc;
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .admin-search-row:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .admin-list-row {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: rgba(0, 0, 0, 0.06);
+  }
+
+  .admin-role-btn {
+    border-color: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.03);
+    color: #334155;
+  }
+
+  .admin-add-form {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .admin-add-form input,
+  .admin-add-form select {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: #0f172a;
+  }
+
+  .admin-edit-row {
+    background: rgba(59, 130, 246, 0.04);
+    border-color: rgba(59, 130, 246, 0.15);
+  }
+
+  .admin-edit-fields input {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: #0f172a;
+  }
+
+  .admin-edit-fields label {
+    color: #64748b;
+  }
+}
