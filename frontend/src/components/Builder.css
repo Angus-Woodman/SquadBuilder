@@ -43,31 +43,6 @@
   font-size: 0.85rem;
 }
 
-/* ── Back button ─────────────────────────────────────── */
-.back-btn {
-  padding: 7px 14px;
-  font-size: 0.85rem;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
-}
-.back-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.25);
-}
-
-@media (prefers-color-scheme: light) {
-  .back-btn {
-    border-color: rgba(0, 0, 0, 0.12);
-  }
-  .back-btn:hover {
-    background: rgba(0, 0, 0, 0.04);
-    border-color: rgba(0, 0, 0, 0.25);
-  }
-}
-
 /* ── Content area ────────────────────────────────────── */
 .builder-body {
   flex: 1;

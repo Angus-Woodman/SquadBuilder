@@ -1,6 +1,7 @@
+import { Link } from "react-router-dom";
 import "./LandingPage.css";
 
-export function LandingPage(props: { onStart: () => void }) {
+export function LandingPage() {
   return (
     <div className="landing">
       {/* Top nav */}
@@ -22,9 +23,9 @@ export function LandingPage(props: { onStart: () => void }) {
         <p className="hero-sub">
           Pick your 26-player World Cup squad — then see how your picks compare to the crowd.
         </p>
-        <button className="cta-primary" onClick={props.onStart}>
+        <Link to="/builder" className="cta-primary">
           Build your squad →
-        </button>
+        </Link>
       </section>
 
       {/* Stat cards (dummy for now) */}
