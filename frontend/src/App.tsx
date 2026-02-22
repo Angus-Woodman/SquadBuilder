@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 
 import { fetchPlayers, refreshData } from "./api/client";
@@ -26,6 +26,7 @@ export default function App() {
   // Squad selection
   const [selectedIds, setSelectedIds] = useState<number[]>(() => loadSelectedIds());
   const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const abortRef = useRef<AbortController | null>(null);
 
   const filteredPlayers = useMemo(() => {
     const s = search.trim().toLowerCase();
@@ -42,12 +43,17 @@ export default function App() {
   );
 
   async function load() {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError(null);
     try {
-      const res = await fetchPlayers({ nationality, limit });
+      const res = await fetchPlayers({ nationality, limit }, controller.signal);
       setAllPlayers(res.players);
     } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return;
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
@@ -70,6 +76,7 @@ export default function App() {
 
   function addToSquad(p: Player) {
     setSelectedIds((prev) => {
+      if (prev.length >= 26) return prev;
       if (prev.includes(p.player_id)) return prev;
       const next = [...prev, p.player_id];
       saveSelectedIds(next);
@@ -130,7 +137,7 @@ export default function App() {
       >
         <section>
           <h2 style={{ marginTop: 0, fontSize: 18 }}>Player list</h2>
-          <PlayerTable players={filteredPlayers} selectedIds={selectedIdSet} onAdd={addToSquad} />
+          <PlayerTable players={filteredPlayers} selectedIds={selectedIdSet} onAdd={addToSquad} disabledAdd={selectedIds.length >= 26} />
         </section>
 
         <aside>

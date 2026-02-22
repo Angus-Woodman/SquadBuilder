@@ -1,14 +1,14 @@
 import type { PlayersResponse } from "../types/player";
 
-export async function fetchPlayers(params: {
-  nationality?: string;
-  limit?: number;
-}): Promise<PlayersResponse> {
+export async function fetchPlayers(
+  params: { nationality?: string; limit?: number },
+  signal?: AbortSignal,
+): Promise<PlayersResponse> {
   const qs = new URLSearchParams();
   if (params.nationality?.trim()) qs.set("nationality", params.nationality.trim());
   if (params.limit) qs.set("limit", String(params.limit));
 
-  const res = await fetch(`/players?${qs.toString()}`);
+  const res = await fetch(`/players?${qs.toString()}`, { signal });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`GET /players failed (${res.status}): ${text}`);

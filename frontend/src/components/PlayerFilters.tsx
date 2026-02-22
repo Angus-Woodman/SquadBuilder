@@ -40,7 +40,7 @@ export function PlayerFilters(props: {
         <label>Position</label>
         <select
           value={props.posFilter}
-          onChange={(e) => props.setPosFilter(e.target.value as any)}
+          onChange={(e) => props.setPosFilter(e.target.value as PositionGroup | "ALL")}
           style={{ padding: "8px 10px", minWidth: 150 }}
         >
           <option value="ALL">All</option>

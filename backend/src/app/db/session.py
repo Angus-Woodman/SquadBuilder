@@ -20,5 +20,6 @@ def get_engine() -> Engine:
     return create_engine(get_database_url(), pool_pre_ping=True)
 
 
+@lru_cache(maxsize=1)
 def get_sessionmaker():
     return sessionmaker(bind=get_engine(), autoflush=False, autocommit=False)

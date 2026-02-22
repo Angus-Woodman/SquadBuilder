@@ -1,7 +1,7 @@
 .PHONY: backend-fetch backend-lint backend-format backend-test db-up db-down db-logs backend-api backend-dev frontend-dev
 
 backend-fetch:
-	cd backend && uv run python -m app.cli fetch -c PL
+	cd backend && uv run python -m app.cli refresh -c PL
 
 backend-lint:
 	cd backend && uv run ruff check .

@@ -8,7 +8,7 @@ def list_players(nationality: str | None = None, limit: int | None = None) -> li
 
     SessionLocal = get_sessionmaker()
 
-    stmt = select(Player)
+    stmt = select(Player).order_by(Player.name)
     if nationality:
         stmt = stmt.where(func.lower(Player.nationality) == nationality.lower())
     if limit:
