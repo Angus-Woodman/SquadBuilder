@@ -1,0 +1,143 @@
+/* ── Squad View page ──────────────────────────────────────────────── */
+
+.sv-content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* Header */
+.sv-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.sv-title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.sv-meta {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  margin: 0.3rem 0 0;
+}
+
+.sv-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.sv-edit-btn {
+  padding: 0.65rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.sv-edit-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.sv-back-link {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: color 0.2s;
+}
+
+.sv-back-link:hover {
+  color: #f1f5f9;
+}
+
+/* ── Roster list ──────────────────────────────────────────────────── */
+
+.sv-roster-group {
+  margin-bottom: 1.25rem;
+}
+
+.sv-roster-group h3 {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.sv-roster-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sv-roster-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.55rem 0.85rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.sv-roster-meta {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .sv-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sv-actions {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+/* ── Light mode ───────────────────────────────────────────────────── */
+
+@media (prefers-color-scheme: light) {
+  .sv-title {
+    color: #0f172a;
+  }
+
+  .sv-meta {
+    color: #64748b;
+  }
+
+  .sv-back-link {
+    color: #64748b;
+  }
+
+  .sv-back-link:hover {
+    color: #0f172a;
+  }
+
+  .sv-roster-row {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(0, 0, 0, 0.06);
+  }
+
+  .sv-roster-group h3 {
+    color: #64748b;
+  }
+}

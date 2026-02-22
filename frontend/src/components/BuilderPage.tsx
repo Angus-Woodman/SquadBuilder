@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
-import { fetchPlayers } from "../api/client";
+import { fetchPlayers, fetchSuggestedIds, createSquad, updateSquad } from "../api/client";
+import { useAuth } from "../context/AuthContext";
 import { PlayerFilters } from "./PlayerFilters";
 import { PlayerTable } from "./PlayerTable";
 import { SquadPanel } from "./SquadPanel";
@@ -13,9 +15,14 @@ import {
 } from "../utils/storage";
 import type { PositionGroup } from "../utils/positions";
 import { positionGroup } from "../utils/positions";
+import "./Dashboard.css";
 import "./Builder.css";
 
 export function BuilderPage() {
+  const { user, logout } = useAuth();
+  const location = useLocation();
+  const navState = location.state as { editSquadId?: number; editPlayerIds?: number[]; editSquadName?: string } | null;
+
   // Filters
   const [search, setSearch] = useState("");
   const [posFilter, setPosFilter] = useState<PositionGroup | "ALL">("ALL");
@@ -25,13 +32,20 @@ export function BuilderPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Squad selection
-  const [selectedIds, setSelectedIds] = useState<number[]>(() => loadSelectedIds());
+  // Squad selection — pre-load from navigation state if editing a saved squad
+  const [selectedIds, setSelectedIds] = useState<number[]>(() =>
+    navState?.editPlayerIds ?? loadSelectedIds()
+  );
   const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
   // Suggested list
   const [suggestedIds, setSuggestedIds] = useState<number[]>(() => loadSuggestedIds());
   const suggestedIdSet = useMemo(() => new Set(suggestedIds), [suggestedIds]);
+
+  // Save squad
+  const [saveName, setSaveName] = useState(navState?.editSquadName ?? "");
+  const [saveMsg, setSaveMsg] = useState<string | null>(null);
+  const [editingSquadId] = useState<number | null>(navState?.editSquadId ?? null);
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -57,11 +71,18 @@ export function BuilderPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetchPlayers({ nationality: "England", limit: 600 }, controller.signal);
+      const [res, serverSuggested] = await Promise.all([
+        fetchPlayers({ nationality: "England", limit: 600 }, controller.signal),
+        fetchSuggestedIds(),
+      ]);
       setAllPlayers(res.players);
 
-      // Auto-seed suggested list on first load if empty
-      if (suggestedIds.length === 0 && res.players.length > 0) {
+      // Use server-side suggested list if available, else fallback to local/seed
+      if (serverSuggested.length > 0) {
+        setSuggestedIds(serverSuggested);
+        saveSuggestedIds(serverSuggested);
+      } else if (suggestedIds.length === 0 && res.players.length > 0) {
+        // Auto-seed suggested list on first load if empty
         const seed = res.players.map((p) => p.player_id);
         setSuggestedIds(seed);
         saveSuggestedIds(seed);
@@ -107,14 +128,50 @@ export function BuilderPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  async function handleSaveSquad() {
+    if (!user) return;
+    if (!saveName.trim()) {
+      setSaveMsg("Enter a squad name first");
+      return;
+    }
+    if (selectedIds.length === 0) {
+      setSaveMsg("Select some players first");
+      return;
+    }
+    try {
+      if (editingSquadId) {
+        await updateSquad(editingSquadId, saveName.trim(), selectedIds);
+        setSaveMsg("Squad updated!");
+      } else {
+        await createSquad(saveName.trim(), selectedIds);
+        setSaveMsg("Squad saved!");
+      }
+      if (!editingSquadId) setSaveName("");
+    } catch (err) {
+      setSaveMsg(err instanceof Error ? err.message : "Save failed");
+    }
+  }
+
   return (
-    <div className="builder">
-      <nav className="builder-nav">
-        <h1>⚽ Squad Selector</h1>
-        <span className="squad-count">26-player World Cup squad</span>
+    <div className="dashboard-page">
+      <nav className="dashboard-nav">
+        <Link to="/" className="dashboard-brand">⚽ Squad Builder</Link>
+        <div className="dashboard-nav-links">
+          <Link to="/builder" className="active">Builder</Link>
+          {user && (
+            <>
+              <Link to="/squads">My Squads</Link>
+              <Link to="/friends">Friends</Link>
+              {user.role === "admin" && <Link to="/admin">Admin</Link>}
+              <span className="dashboard-user">{user.display_name}</span>
+              <button className="dashboard-logout" onClick={logout}>Log out</button>
+            </>
+          )}
+          {!user && <Link to="/login">Log in</Link>}
+        </div>
       </nav>
 
-      <div className="builder-body">
+      <div className="dashboard-content dashboard-content--wide">
         <PlayerFilters
           search={search}
           setSearch={setSearch}
@@ -145,6 +202,25 @@ export function BuilderPage() {
 
           <aside>
             <SquadPanel squad={squad} onRemove={removeFromSquad} maxSize={26} />
+
+            {user && selectedIds.length > 0 && (
+              <div className="save-squad-section">
+                {editingSquadId && (
+                  <p className="save-squad-editing">Editing saved squad</p>
+                )}
+                <input
+                  type="text"
+                  placeholder="Squad name…"
+                  value={saveName}
+                  onChange={(e) => setSaveName(e.target.value)}
+                  className="save-squad-input"
+                />
+                <button className="save-squad-btn" onClick={handleSaveSquad}>
+                  {editingSquadId ? "Update squad" : "Save squad"}
+                </button>
+                {saveMsg && <p className="save-squad-msg">{saveMsg}</p>}
+              </div>
+            )}
           </aside>
         </div>
       </div>

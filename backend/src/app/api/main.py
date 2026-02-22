@@ -16,6 +16,11 @@ async def lifespan(_app: FastAPI):
     In production you'd set env vars via your process manager/container."""
     backend_dir = Path(__file__).resolve().parents[3]  # .../backend
     load_dotenv(backend_dir / ".env")
+
+    # Auto-create tables on startup (dev convenience)
+    from app.db.bootstrap import create_tables
+
+    create_tables()
     yield
 
 
@@ -28,6 +33,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ── Mount routers ─────────────────────────────────────────────────────
+
+from app.api.admin_routes import router as admin_router  # noqa: E402
+from app.api.auth_routes import router as auth_router  # noqa: E402
+from app.api.friend_routes import router as friends_router  # noqa: E402
+from app.api.squad_routes import router as squads_router  # noqa: E402
+
+app.include_router(auth_router)
+app.include_router(squads_router)
+app.include_router(friends_router)
+app.include_router(admin_router)
 
 
 class RefreshRequest(BaseModel):
@@ -60,6 +77,22 @@ def get_players(nationality: str | None = None, limit: int = 200) -> dict[str, A
     players_dicts = [_player_to_dict(p) for p in players]
 
     return {"count": len(players_dicts), "players": players_dicts}
+
+
+@app.get("/suggested")
+def get_suggested_public() -> dict[str, Any]:
+    """Public endpoint: returns the list of suggested player IDs."""
+    from sqlalchemy import select
+
+    from app.db.models import SuggestedPlayer
+    from app.db.session import get_sessionmaker
+
+    Session = get_sessionmaker()
+    with Session() as db:
+        rows = db.scalars(
+            select(SuggestedPlayer.player_id).where(SuggestedPlayer.is_active.is_(True))
+        ).all()
+    return {"player_ids": list(rows)}
 
 
 @app.post("/refresh")
