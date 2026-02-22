@@ -21,54 +21,41 @@ export function SquadPanel(props: {
   const groupOrder: PositionGroup[] = ["GK", "DEF", "MID", "FWD", "OTHER"];
 
   return (
-    <div style={{ border: "1px solid #ddd", borderRadius: 10, padding: 14 }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10 }}>
-        <h2 style={{ margin: 0, fontSize: 18 }}>Selected squad</h2>
-        <div style={{ opacity: 0.75 }}>
+    <div className="squad-panel">
+      <div className="squad-header">
+        <h2>Selected squad</h2>
+        <span className="count">
           {props.squad.length}/{max}
-        </div>
+        </span>
       </div>
 
       {props.squad.length === 0 ? (
-        <div style={{ opacity: 0.8 }}>No players selected yet.</div>
+        <div className="squad-empty">No players selected yet.</div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {groupOrder.map((g) => (
             <div key={g}>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>
-                {GROUP_LABELS[g]} <span style={{ opacity: 0.7 }}>({grouped[g].length})</span>
+              <div className="squad-group-label">
+                {GROUP_LABELS[g]} <span>({grouped[g].length})</span>
               </div>
               {grouped[g].length === 0 ? (
-                <div style={{ opacity: 0.7 }}>—</div>
+                <div style={{ opacity: 0.35 }}>—</div>
               ) : (
                 <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
                   {grouped[g]
                     .slice()
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map((p) => (
-                      <li
-                        key={p.player_id}
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          gap: 10,
-                          border: "1px solid #eee",
-                          borderRadius: 8,
-                          padding: "8px 10px",
-                        }}
-                      >
+                      <li key={p.player_id} className="squad-player">
                         <div style={{ minWidth: 0 }}>
-                          <div style={{ fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {p.name}
-                          </div>
-                          <div style={{ opacity: 0.75, fontSize: 12 }}>
-                            {p.position ?? "—"} • {p.nationality ?? "—"}
+                          <div className="squad-player-name">{p.name}</div>
+                          <div className="squad-player-meta">
+                            {p.position ?? "—"} · {p.nationality ?? "—"}
                           </div>
                         </div>
                         <button
+                          className="remove-btn"
                           onClick={() => props.onRemove(p.player_id)}
-                          style={{ padding: "6px 10px", cursor: "pointer" }}
                         >
                           Remove
                         </button>

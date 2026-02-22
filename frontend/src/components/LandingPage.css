@@ -1,8 +1,9 @@
 /* ── Landing page ───────────────────────────────────── */
 .landing {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* ── Nav ─────────────────────────────────────────────── */
@@ -10,10 +11,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 32px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  padding: 12px 32px;
+  flex-shrink: 0;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   background: rgba(36, 36, 36, 0.7);
@@ -29,13 +28,13 @@
 
 .landing-nav-brand {
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   letter-spacing: -0.02em;
 }
 
 .login-btn {
-  padding: 8px 20px;
-  font-size: 0.9rem;
+  padding: 7px 18px;
+  font-size: 0.85rem;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   background: transparent;
@@ -65,26 +64,26 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 80px 24px 60px;
-  max-width: 720px;
+  padding: 0 24px;
+  max-width: 680px;
   margin: 0 auto;
 }
 
 .hero-eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  opacity: 0.55;
-  margin: 0 0 16px;
+  opacity: 0.5;
+  margin: 0 0 12px;
 }
 
 .hero-title {
-  font-size: clamp(2.2rem, 5.5vw, 3.6rem);
+  font-size: clamp(2rem, 5vw, 3.2rem);
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.03em;
-  margin: 0 0 24px;
+  margin: 0 0 16px;
 }
 
 .hero-highlight {
@@ -95,17 +94,17 @@
 }
 
 .hero-sub {
-  max-width: 520px;
-  font-size: 1.1rem;
-  line-height: 1.6;
-  opacity: 0.7;
-  margin: 0 0 36px;
+  max-width: 460px;
+  font-size: 1rem;
+  line-height: 1.5;
+  opacity: 0.65;
+  margin: 0 0 28px;
 }
 
 /* Primary CTA */
 .cta-primary {
-  padding: 14px 36px;
-  font-size: 1.1rem;
+  padding: 13px 32px;
+  font-size: 1.05rem;
   font-weight: 600;
   border: none;
   border-radius: 12px;
@@ -127,117 +126,71 @@
 /* ── Stat cards ──────────────────────────────────────── */
 .stats-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-  padding: 0 32px 64px;
-  max-width: 960px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  padding: 0 32px 20px;
+  max-width: 720px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .stat-card {
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 28px 24px;
+  border-radius: 12px;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   text-align: center;
-  transition: border-color 0.2s, transform 0.15s;
+  transition: border-color 0.2s;
   background: rgba(255, 255, 255, 0.03);
 }
 .stat-card:hover {
   border-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-2px);
 }
 
 @media (prefers-color-scheme: light) {
   .stat-card {
-    border-color: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.08);
     background: rgba(0, 0, 0, 0.02);
   }
   .stat-card:hover {
-    border-color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(0, 0, 0, 0.18);
   }
 }
 
 .stat-icon {
-  font-size: 2rem;
-  margin-bottom: 8px;
+  font-size: 1.4rem;
 }
 
 .stat-card h3 {
-  margin: 0 0 8px;
-  font-size: 1.05rem;
+  margin: 0;
+  font-size: 0.85rem;
   font-weight: 700;
 }
 
 .stat-value {
-  font-size: 0.9rem;
-  font-weight: 600;
-  opacity: 0.5;
-  margin: 0 0 8px;
-  font-style: italic;
-}
-
-.stat-desc {
-  font-size: 0.88rem;
-  line-height: 1.5;
-  opacity: 0.6;
-  margin: 0 0 16px;
-}
-
-/* Secondary CTA (disabled state) */
-.cta-secondary {
-  padding: 8px 18px;
-  font-size: 0.85rem;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 500;
   opacity: 0.45;
-  cursor: not-allowed;
-}
-
-@media (prefers-color-scheme: light) {
-  .cta-secondary {
-    border-color: rgba(0, 0, 0, 0.1);
-  }
+  font-style: italic;
 }
 
 /* ── Footer ──────────────────────────────────────────── */
 .landing-footer {
   text-align: center;
-  padding: 24px;
-  opacity: 0.4;
-  font-size: 0.85rem;
+  padding: 12px 24px;
+  opacity: 0.35;
+  font-size: 0.78rem;
+  flex-shrink: 0;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 @media (prefers-color-scheme: light) {
   .landing-footer {
     border-top-color: rgba(0, 0, 0, 0.06);
-  }
-}
-
-/* ── Back button (used in builder view) ──────────────── */
-.back-btn {
-  padding: 8px 16px;
-  font-size: 0.85rem;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.back-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.25);
-}
-
-@media (prefers-color-scheme: light) {
-  .back-btn {
-    border-color: rgba(0, 0, 0, 0.12);
-  }
-  .back-btn:hover {
-    background: rgba(0, 0, 0, 0.04);
-    border-color: rgba(0, 0, 0, 0.25);
   }
 }

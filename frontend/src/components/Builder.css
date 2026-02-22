@@ -1,0 +1,410 @@
+/* ── Builder layout ───────────────────────────────────── */
+.builder {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Builder nav (mirrors landing-nav) ──────────────── */
+.builder-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 32px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(36, 36, 36, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+@media (prefers-color-scheme: light) {
+  .builder-nav {
+    background: rgba(255, 255, 255, 0.75);
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+  }
+}
+
+.builder-nav h1 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  flex: 1;
+  letter-spacing: -0.02em;
+}
+
+.builder-nav .squad-count {
+  opacity: 0.55;
+  font-size: 0.85rem;
+}
+
+/* ── Back button ─────────────────────────────────────── */
+.back-btn {
+  padding: 7px 14px;
+  font-size: 0.85rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+@media (prefers-color-scheme: light) {
+  .back-btn {
+    border-color: rgba(0, 0, 0, 0.12);
+  }
+  .back-btn:hover {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* ── Content area ────────────────────────────────────── */
+.builder-body {
+  flex: 1;
+  padding: 20px 32px 32px;
+}
+
+/* ── Filters bar ─────────────────────────────────────── */
+.filters-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: end;
+  margin-bottom: 20px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.5;
+}
+
+.filter-group input,
+.filter-group select {
+  padding: 9px 12px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: inherit;
+  transition: border-color 0.2s;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+@media (prefers-color-scheme: light) {
+  .filter-group input,
+  .filter-group select {
+    border-color: rgba(0, 0, 0, 0.12);
+    background: rgba(0, 0, 0, 0.03);
+  }
+}
+
+.filter-group input[type="number"] {
+  width: 80px;
+}
+
+.refresh-btn {
+  padding: 9px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  color: #fff;
+  background: linear-gradient(135deg, #646cff 0%, #7c5ce7 100%);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 2px 12px rgba(100, 108, 255, 0.25);
+}
+.refresh-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(100, 108, 255, 0.4);
+}
+.refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.player-count {
+  margin-left: auto;
+  opacity: 0.5;
+  font-size: 0.85rem;
+}
+
+/* ── Error banner ────────────────────────────────────── */
+.error-banner {
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  border: 1px solid rgba(255, 80, 80, 0.3);
+  background: rgba(255, 80, 80, 0.08);
+  color: #ff6b6b;
+}
+
+@media (prefers-color-scheme: light) {
+  .error-banner {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #b91c1c;
+  }
+}
+
+/* ── Grid layout ─────────────────────────────────────── */
+.builder-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.builder-grid h2 {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.5;
+}
+
+/* ── Player table ────────────────────────────────────── */
+.player-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+@media (prefers-color-scheme: light) {
+  .player-table-wrap {
+    border-color: rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.01);
+  }
+}
+
+.player-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.player-table thead tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (prefers-color-scheme: light) {
+  .player-table thead tr {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+  }
+}
+
+.player-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.45;
+}
+
+.player-table td {
+  padding: 9px 12px;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+@media (prefers-color-scheme: light) {
+  .player-table td {
+    border-bottom-color: rgba(0, 0, 0, 0.05);
+  }
+}
+
+.player-table tbody tr {
+  transition: background 0.12s;
+}
+.player-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+@media (prefers-color-scheme: light) {
+  .player-table tbody tr:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+}
+
+/* Add / selected button in table */
+.add-btn {
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.add-btn:hover:not(:disabled) {
+  background: rgba(100, 108, 255, 0.12);
+  border-color: #646cff;
+}
+.add-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.add-btn.selected {
+  color: #646cff;
+  border-color: rgba(100, 108, 255, 0.25);
+}
+
+@media (prefers-color-scheme: light) {
+  .add-btn {
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* ── Squad panel ─────────────────────────────────────── */
+.squad-panel {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+@media (prefers-color-scheme: light) {
+  .squad-panel {
+    border-color: rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.01);
+  }
+}
+
+.squad-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.squad-header h2 {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.5;
+}
+
+.squad-header .count {
+  font-size: 0.85rem;
+  opacity: 0.45;
+}
+
+.squad-empty {
+  opacity: 0.45;
+  font-size: 0.9rem;
+  padding: 8px 0;
+}
+
+.squad-group-label {
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.45;
+  margin-bottom: 8px;
+}
+
+.squad-group-label span {
+  font-weight: 500;
+}
+
+.squad-player {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 8px 10px;
+  transition: border-color 0.15s;
+}
+.squad-player:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+@media (prefers-color-scheme: light) {
+  .squad-player {
+    border-color: rgba(0, 0, 0, 0.06);
+  }
+  .squad-player:hover {
+    border-color: rgba(0, 0, 0, 0.14);
+  }
+}
+
+.squad-player-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.squad-player-meta {
+  opacity: 0.5;
+  font-size: 0.75rem;
+}
+
+.remove-btn {
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 80, 80, 0.2);
+  background: transparent;
+  color: #ff6b6b;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.remove-btn:hover {
+  background: rgba(255, 80, 80, 0.1);
+  border-color: rgba(255, 80, 80, 0.4);
+}
+
+@media (prefers-color-scheme: light) {
+  .remove-btn {
+    color: #dc2626;
+    border-color: rgba(220, 38, 38, 0.2);
+  }
+  .remove-btn:hover {
+    background: rgba(220, 38, 38, 0.06);
+    border-color: rgba(220, 38, 38, 0.4);
+  }
+}
+
+.no-players-row {
+  opacity: 0.45;
+  padding: 16px 12px;
+}

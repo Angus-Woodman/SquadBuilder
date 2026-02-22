@@ -10,6 +10,7 @@ import type { Player } from "./types/player";
 import { loadSelectedIds, saveSelectedIds } from "./utils/storage";
 import type { PositionGroup } from "./utils/positions";
 import { positionGroup } from "./utils/positions";
+import "./components/Builder.css";
 
 export default function App() {
   // Filters
@@ -106,14 +107,14 @@ export default function App() {
   }
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: 24 }}>
-      <header style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+    <div className="builder">
+      <nav className="builder-nav">
         <button className="back-btn" onClick={() => setPage("landing")}>← Back</button>
-        <h1 style={{ margin: 0, flex: 1 }}>Squad Selector</h1>
-        <div style={{ opacity: 0.75 }}>26-player World Cup squad</div>
-      </header>
+        <h1>⚽ Squad Selector</h1>
+        <span className="squad-count">26-player World Cup squad</span>
+      </nav>
 
-      <div style={{ marginTop: 16, marginBottom: 16 }}>
+      <div className="builder-body">
         <PlayerFilters
           nationality={nationality}
           setNationality={setNationality}
@@ -128,30 +129,23 @@ export default function App() {
           loading={loading}
           playerCount={filteredPlayers.length}
         />
-      </div>
 
-      {error && (
-        <div style={{ background: "#fee", border: "1px solid #f99", padding: 12, borderRadius: 8, marginBottom: 16 }}>
-          <strong>Error:</strong> {error}
+        {error && (
+          <div className="error-banner">
+            <strong>Error:</strong> {error}
+          </div>
+        )}
+
+        <div className="builder-grid">
+          <section>
+            <h2>Player list</h2>
+            <PlayerTable players={filteredPlayers} selectedIds={selectedIdSet} onAdd={addToSquad} disabledAdd={selectedIds.length >= 26} />
+          </section>
+
+          <aside>
+            <SquadPanel squad={squad} onRemove={removeFromSquad} maxSize={26} />
+          </aside>
         </div>
-      )}
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1.6fr 1fr",
-          gap: 16,
-          alignItems: "start",
-        }}
-      >
-        <section>
-          <h2 style={{ marginTop: 0, fontSize: 18 }}>Player list</h2>
-          <PlayerTable players={filteredPlayers} selectedIds={selectedIdSet} onAdd={addToSquad} disabledAdd={selectedIds.length >= 26} />
-        </section>
-
-        <aside>
-          <SquadPanel squad={squad} onRemove={removeFromSquad} maxSize={26} />
-        </aside>
       </div>
     </div>
   );

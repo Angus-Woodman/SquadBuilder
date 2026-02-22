@@ -20,9 +20,7 @@ export function LandingPage(props: { onStart: () => void }) {
           <span className="hero-highlight">Thomas Tuchel's</span> shoes
         </h1>
         <p className="hero-sub">
-          Pick your 26-player squad for the World Cup. Choose your goalkeeper,
-          defenders, midfielders and forwards — then see how your picks compare
-          to the crowd.
+          Pick your 26-player World Cup squad — then see how your picks compare to the crowd.
         </p>
         <button className="cta-primary" onClick={props.onStart}>
           Build your squad →
@@ -32,55 +30,31 @@ export function LandingPage(props: { onStart: () => void }) {
       {/* Stat cards (dummy for now) */}
       <section className="stats-section">
         <div className="stat-card">
-          <div className="stat-icon">🏆</div>
+          <span className="stat-icon">🏆</span>
           <h3>Most Selected Squad</h3>
-          <p className="stat-value">Coming soon</p>
-          <p className="stat-desc">
-            See which 26-player lineup the community agrees on most.
-          </p>
-          <button className="cta-secondary" disabled>
-            View squad
-          </button>
+          <span className="stat-value">Coming soon</span>
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon">⭐</div>
+          <span className="stat-icon">⭐</span>
           <h3>Most Selected Player</h3>
-          <p className="stat-value">Coming soon</p>
-          <p className="stat-desc">
-            Find out which player appears in the most user-built squads.
-          </p>
-          <button className="cta-secondary" disabled>
-            View stats
-          </button>
+          <span className="stat-value">Coming soon</span>
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon">📊</div>
+          <span className="stat-icon">📊</span>
           <h3>Your History</h3>
-          <p className="stat-value">Coming soon</p>
-          <p className="stat-desc">
-            Log in to save multiple squads and track how your picks evolve.
-          </p>
-          <button className="cta-secondary" disabled>
-            Log in to unlock
-          </button>
+          <span className="stat-value">Coming soon</span>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="landing-footer">
-        <p>
-          Data from{" "}
-          <a
-            href="https://www.football-data.org/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            football-data.org
-          </a>{" "}
-          · Built for fun, not profit
-        </p>
+        Data from{" "}
+        <a href="https://www.football-data.org/" target="_blank" rel="noreferrer">
+          football-data.org
+        </a>{" "}
+        · Built for fun, not profit
       </footer>
     </div>
   );
