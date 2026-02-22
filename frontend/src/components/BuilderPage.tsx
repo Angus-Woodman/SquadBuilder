@@ -1,31 +1,38 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { fetchPlayers, refreshData } from "../api/client";
+import { fetchPlayers } from "../api/client";
 import { PlayerFilters } from "./PlayerFilters";
 import { PlayerTable } from "./PlayerTable";
 import { SquadPanel } from "./SquadPanel";
 import type { Player } from "../types/player";
-import { loadSelectedIds, saveSelectedIds } from "../utils/storage";
+import {
+  loadSelectedIds,
+  saveSelectedIds,
+  loadSuggestedIds,
+  saveSuggestedIds,
+} from "../utils/storage";
 import type { PositionGroup } from "../utils/positions";
 import { positionGroup } from "../utils/positions";
 import "./Builder.css";
 
 export function BuilderPage() {
   // Filters
-  const [nationality, setNationality] = useState("England");
   const [search, setSearch] = useState("");
   const [posFilter, setPosFilter] = useState<PositionGroup | "ALL">("ALL");
-  const [limit, setLimit] = useState(400);
 
   // Data
   const [allPlayers, setAllPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Squad selection
   const [selectedIds, setSelectedIds] = useState<number[]>(() => loadSelectedIds());
   const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+
+  // Suggested list
+  const [suggestedIds, setSuggestedIds] = useState<number[]>(() => loadSuggestedIds());
+  const suggestedIdSet = useMemo(() => new Set(suggestedIds), [suggestedIds]);
+
   const abortRef = useRef<AbortController | null>(null);
 
   const filteredPlayers = useMemo(() => {
@@ -50,26 +57,20 @@ export function BuilderPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetchPlayers({ nationality, limit }, controller.signal);
+      const res = await fetchPlayers({ nationality: "England", limit: 600 }, controller.signal);
       setAllPlayers(res.players);
+
+      // Auto-seed suggested list on first load if empty
+      if (suggestedIds.length === 0 && res.players.length > 0) {
+        const seed = res.players.map((p) => p.player_id);
+        setSuggestedIds(seed);
+        saveSuggestedIds(seed);
+      }
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") return;
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function onRefresh() {
-    setRefreshing(true);
-    setError(null);
-    try {
-      await refreshData(["PL"]);
-      await load();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setRefreshing(false);
     }
   }
 
@@ -91,10 +92,20 @@ export function BuilderPage() {
     });
   }
 
+  function toggleSuggested(playerId: number) {
+    setSuggestedIds((prev) => {
+      const next = prev.includes(playerId)
+        ? prev.filter((id) => id !== playerId)
+        : [...prev, playerId];
+      saveSuggestedIds(next);
+      return next;
+    });
+  }
+
   useEffect(() => {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nationality, limit]);
+  }, []);
 
   return (
     <div className="builder">
@@ -105,16 +116,10 @@ export function BuilderPage() {
 
       <div className="builder-body">
         <PlayerFilters
-          nationality={nationality}
-          setNationality={setNationality}
           search={search}
           setSearch={setSearch}
           posFilter={posFilter}
           setPosFilter={setPosFilter}
-          limit={limit}
-          setLimit={setLimit}
-          onRefresh={onRefresh}
-          refreshing={refreshing}
           loading={loading}
           playerCount={filteredPlayers.length}
         />
@@ -128,7 +133,14 @@ export function BuilderPage() {
         <div className="builder-grid">
           <section>
             <h2>Player list</h2>
-            <PlayerTable players={filteredPlayers} selectedIds={selectedIdSet} onAdd={addToSquad} disabledAdd={selectedIds.length >= 26} />
+            <PlayerTable
+              players={filteredPlayers}
+              selectedIds={selectedIdSet}
+              suggestedIds={suggestedIdSet}
+              onAdd={addToSquad}
+              onToggleSuggested={toggleSuggested}
+              disabledAdd={selectedIds.length >= 26}
+            />
           </section>
 
           <aside>

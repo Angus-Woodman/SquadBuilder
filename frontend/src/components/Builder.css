@@ -383,3 +383,83 @@
   opacity: 0.45;
   padding: 16px 12px;
 }
+
+/* ── Position sections ───────────────────────────────── */
+.position-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.position-section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.position-section-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.position-section-count {
+  font-weight: 400;
+  font-size: 0.78rem;
+  opacity: 0.45;
+}
+
+/* Expand / collapse toggle */
+.expand-btn {
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.expand-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+@media (prefers-color-scheme: light) {
+  .expand-btn {
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+  .expand-btn:hover {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Suggest star button */
+.suggest-btn {
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.3;
+  transition: opacity 0.15s, color 0.15s;
+}
+.suggest-btn:hover {
+  opacity: 0.7;
+}
+.suggest-btn.active {
+  opacity: 1;
+  color: #f59e0b;
+}
+
+/* Dim non-suggested rows when expanded */
+.row-non-suggested {
+  opacity: 0.55;
+}
+.row-non-suggested:hover {
+  opacity: 0.85;
+}
