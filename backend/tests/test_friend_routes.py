@@ -15,13 +15,13 @@ def _two_users(client) -> tuple[str, str]:
 def _befriend(client, token_a: str, token_b: str) -> int:
     """A sends request to B, B accepts. Returns friendship_id."""
     client.post(
-        "/friends/request",
+        "/api/friends/request",
         json={"email": "bob@example.com"},
         headers=auth_header(token_a),
     )
-    friends = client.get("/friends/", headers=auth_header(token_b)).json()
+    friends = client.get("/api/friends/", headers=auth_header(token_b)).json()
     fid = friends[0]["friendship_id"]
-    client.put(f"/friends/{fid}/accept", headers=auth_header(token_b))
+    client.put(f"/api/friends/{fid}/accept", headers=auth_header(token_b))
     return fid
 
 
@@ -33,7 +33,7 @@ class TestSendRequest:
         token_a, token_b = _two_users(client)
 
         resp = client.post(
-            "/friends/request",
+            "/api/friends/request",
             json={"email": "bob@example.com"},
             headers=auth_header(token_a),
         )
@@ -47,7 +47,7 @@ class TestSendRequest:
         token = register_user(client, email="self@example.com")["access_token"]
 
         resp = client.post(
-            "/friends/request",
+            "/api/friends/request",
             json={"email": "self@example.com"},
             headers=auth_header(token),
         )
@@ -58,12 +58,12 @@ class TestSendRequest:
         token_a, _ = _two_users(client)
 
         client.post(
-            "/friends/request",
+            "/api/friends/request",
             json={"email": "bob@example.com"},
             headers=auth_header(token_a),
         )
         resp = client.post(
-            "/friends/request",
+            "/api/friends/request",
             json={"email": "bob@example.com"},
             headers=auth_header(token_a),
         )
@@ -75,12 +75,12 @@ class TestSendRequest:
         token_a, token_b = _two_users(client)
 
         client.post(
-            "/friends/request",
+            "/api/friends/request",
             json={"email": "bob@example.com"},
             headers=auth_header(token_a),
         )
         resp = client.post(
-            "/friends/request",
+            "/api/friends/request",
             json={"email": "alice@example.com"},
             headers=auth_header(token_b),
         )
@@ -90,7 +90,7 @@ class TestSendRequest:
         token = register_user(client, email="lonely@example.com")["access_token"]
 
         resp = client.post(
-            "/friends/request",
+            "/api/friends/request",
             json={"email": "ghost@example.com"},
             headers=auth_header(token),
         )
@@ -106,20 +106,20 @@ class TestAcceptRequest:
 
         # Alice → Bob
         client.post(
-            "/friends/request",
+            "/api/friends/request",
             json={"email": "bob@example.com"},
             headers=auth_header(token_a),
         )
 
         # Bob sees the request
-        friends = client.get("/friends/", headers=auth_header(token_b)).json()
+        friends = client.get("/api/friends/", headers=auth_header(token_b)).json()
         assert len(friends) == 1
         fid = friends[0]["friendship_id"]
         assert friends[0]["status"] == "pending"
         assert friends[0]["direction"] == "received"
 
         # Bob accepts
-        resp = client.put(f"/friends/{fid}/accept", headers=auth_header(token_b))
+        resp = client.put(f"/api/friends/{fid}/accept", headers=auth_header(token_b))
         assert resp.status_code == 200
         assert resp.json()["status"] == "accepted"
 
@@ -128,19 +128,19 @@ class TestAcceptRequest:
         token_a, token_b = _two_users(client)
 
         resp = client.post(
-            "/friends/request",
+            "/api/friends/request",
             json={"email": "bob@example.com"},
             headers=auth_header(token_a),
         )
         fid = resp.json()["friendship_id"]
 
         # Alice tries to accept her own request
-        resp = client.put(f"/friends/{fid}/accept", headers=auth_header(token_a))
+        resp = client.put(f"/api/friends/{fid}/accept", headers=auth_header(token_a))
         assert resp.status_code == 404
 
     def test_accept_nonexistent_request(self, client):
         token = register_user(client)["access_token"]
-        resp = client.put("/friends/99999/accept", headers=auth_header(token))
+        resp = client.put("/api/friends/99999/accept", headers=auth_header(token))
         assert resp.status_code == 404
 
     def test_accept_already_accepted(self, client):
@@ -148,7 +148,7 @@ class TestAcceptRequest:
         fid = _befriend(client, token_a, token_b)
 
         # Try to accept again
-        resp = client.put(f"/friends/{fid}/accept", headers=auth_header(token_b))
+        resp = client.put(f"/api/friends/{fid}/accept", headers=auth_header(token_b))
         assert resp.status_code == 404  # not pending anymore
 
 
@@ -158,7 +158,7 @@ class TestAcceptRequest:
 class TestListFriends:
     def test_list_friends_empty(self, client):
         token = register_user(client)["access_token"]
-        resp = client.get("/friends/", headers=auth_header(token))
+        resp = client.get("/api/friends/", headers=auth_header(token))
         assert resp.status_code == 200
         assert resp.json() == []
 
@@ -167,12 +167,12 @@ class TestListFriends:
         _befriend(client, token_a, token_b)
 
         # Alice sees Bob
-        friends_a = client.get("/friends/", headers=auth_header(token_a)).json()
+        friends_a = client.get("/api/friends/", headers=auth_header(token_a)).json()
         assert len(friends_a) == 1
         assert friends_a[0]["display_name"] == "Bob"
 
         # Bob sees Alice
-        friends_b = client.get("/friends/", headers=auth_header(token_b)).json()
+        friends_b = client.get("/api/friends/", headers=auth_header(token_b)).json()
         assert len(friends_b) == 1
         assert friends_b[0]["display_name"] == "Alice"
 
@@ -180,12 +180,12 @@ class TestListFriends:
         token_a, token_b = _two_users(client)
 
         client.post(
-            "/friends/request",
+            "/api/friends/request",
             json={"email": "bob@example.com"},
             headers=auth_header(token_a),
         )
 
-        friends_a = client.get("/friends/", headers=auth_header(token_a)).json()
+        friends_a = client.get("/api/friends/", headers=auth_header(token_a)).json()
         assert len(friends_a) == 1
         assert friends_a[0]["status"] == "pending"
 
@@ -198,30 +198,30 @@ class TestRemoveFriend:
         token_a, token_b = _two_users(client)
         fid = _befriend(client, token_a, token_b)
 
-        resp = client.delete(f"/friends/{fid}", headers=auth_header(token_a))
+        resp = client.delete(f"/api/friends/{fid}", headers=auth_header(token_a))
         assert resp.status_code == 204
 
         # Verify both sides see empty
-        assert client.get("/friends/", headers=auth_header(token_a)).json() == []
-        assert client.get("/friends/", headers=auth_header(token_b)).json() == []
+        assert client.get("/api/friends/", headers=auth_header(token_a)).json() == []
+        assert client.get("/api/friends/", headers=auth_header(token_b)).json() == []
 
     def test_remove_pending_request(self, client):
         token_a, token_b = _two_users(client)
 
         resp = client.post(
-            "/friends/request",
+            "/api/friends/request",
             json={"email": "bob@example.com"},
             headers=auth_header(token_a),
         )
         fid = resp.json()["friendship_id"]
 
         # Either side can remove
-        resp = client.delete(f"/friends/{fid}", headers=auth_header(token_b))
+        resp = client.delete(f"/api/friends/{fid}", headers=auth_header(token_b))
         assert resp.status_code == 204
 
     def test_remove_nonexistent_friendship(self, client):
         token = register_user(client)["access_token"]
-        resp = client.delete("/friends/99999", headers=auth_header(token))
+        resp = client.delete("/api/friends/99999", headers=auth_header(token))
         assert resp.status_code == 404
 
     def test_remove_others_friendship(self, client):
@@ -230,7 +230,7 @@ class TestRemoveFriend:
         fid = _befriend(client, token_a, token_b)
 
         token_c = register_user(client, email="carol@example.com")["access_token"]
-        resp = client.delete(f"/friends/{fid}", headers=auth_header(token_c))
+        resp = client.delete(f"/api/friends/{fid}", headers=auth_header(token_c))
         assert resp.status_code == 404
 
 
@@ -247,18 +247,18 @@ class TestFriendSquads:
         create_player_in_db(db, player_id=2, name="Player 2")
 
         client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "Alice's XI", "player_ids": [1, 2]},
             headers=auth_header(token_a),
         )
 
         # Get Alice's user ID
-        alice_info = client.get("/auth/me", headers=auth_header(token_a)).json()
+        alice_info = client.get("/api/auth/me", headers=auth_header(token_a)).json()
         alice_id = alice_info["id"]
 
         # Bob views Alice's squads
         resp = client.get(
-            f"/friends/{alice_id}/squads",
+            f"/api/friends/{alice_id}/squads",
             headers=auth_header(token_b),
         )
         assert resp.status_code == 200
@@ -269,11 +269,11 @@ class TestFriendSquads:
     def test_view_squads_not_friends(self, client, db):
         token_a, token_b = _two_users(client)  # not befriended
 
-        alice_info = client.get("/auth/me", headers=auth_header(token_a)).json()
+        alice_info = client.get("/api/auth/me", headers=auth_header(token_a)).json()
         alice_id = alice_info["id"]
 
         resp = client.get(
-            f"/friends/{alice_id}/squads",
+            f"/api/friends/{alice_id}/squads",
             headers=auth_header(token_b),
         )
         assert resp.status_code == 403
@@ -284,14 +284,14 @@ class TestFriendSquads:
 
         # Send request but don't accept
         client.post(
-            "/friends/request",
+            "/api/friends/request",
             json={"email": "bob@example.com"},
             headers=auth_header(token_a),
         )
 
-        alice_info = client.get("/auth/me", headers=auth_header(token_a)).json()
+        alice_info = client.get("/api/auth/me", headers=auth_header(token_a)).json()
         resp = client.get(
-            f"/friends/{alice_info['id']}/squads",
+            f"/api/friends/{alice_info['id']}/squads",
             headers=auth_header(token_b),
         )
         assert resp.status_code == 403

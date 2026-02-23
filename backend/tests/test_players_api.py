@@ -11,7 +11,7 @@ from conftest import auth_header, create_player_in_db, make_admin, register_user
 
 class TestHealth:
     def test_health_returns_ok(self, client):
-        resp = client.get("/health")
+        resp = client.get("/api/health")
         assert resp.status_code == 200
         assert resp.json() == {"status": "ok"}
 
@@ -21,7 +21,7 @@ class TestHealth:
 
 class TestGetPlayers:
     def test_get_players_empty_db(self, client):
-        resp = client.get("/players")
+        resp = client.get("/api/players")
         assert resp.status_code == 200
         body = resp.json()
         assert body["count"] == 0
@@ -31,7 +31,7 @@ class TestGetPlayers:
         create_player_in_db(db, player_id=1, name="Harry Kane", nationality="England")
         create_player_in_db(db, player_id=2, name="Jude Bellingham", nationality="England")
 
-        resp = client.get("/players")
+        resp = client.get("/api/players")
         assert resp.status_code == 200
         body = resp.json()
         assert body["count"] == 2
@@ -49,7 +49,7 @@ class TestGetPlayers:
             date_of_birth=date(1995, 6, 15),
         )
 
-        resp = client.get("/players")
+        resp = client.get("/api/players")
         player = resp.json()["players"][0]
         assert player["player_id"] == 10
         assert player["name"] == "Test Player"
@@ -61,7 +61,7 @@ class TestGetPlayers:
         create_player_in_db(db, player_id=1, name="English", nationality="England")
         create_player_in_db(db, player_id=2, name="French", nationality="France")
 
-        resp = client.get("/players?nationality=England")
+        resp = client.get("/api/players?nationality=England")
         body = resp.json()
         assert body["count"] == 1
         assert body["players"][0]["name"] == "English"
@@ -69,22 +69,22 @@ class TestGetPlayers:
     def test_get_players_nationality_case_insensitive(self, client, db):
         create_player_in_db(db, player_id=1, name="English", nationality="England")
 
-        resp = client.get("/players?nationality=england")
+        resp = client.get("/api/players?nationality=england")
         assert resp.json()["count"] == 1
 
     def test_get_players_limit(self, client, db):
         for i in range(1, 11):
             create_player_in_db(db, player_id=i, name=f"Player {i}")
 
-        resp = client.get("/players?limit=5")
+        resp = client.get("/api/players?limit=5")
         assert resp.json()["count"] == 5
 
     def test_get_players_invalid_limit_zero(self, client):
-        resp = client.get("/players?limit=0")
+        resp = client.get("/api/players?limit=0")
         assert resp.status_code == 400
 
     def test_get_players_invalid_limit_too_high(self, client):
-        resp = client.get("/players?limit=3000")
+        resp = client.get("/api/players?limit=3000")
         assert resp.status_code == 400
 
 
@@ -93,7 +93,7 @@ class TestGetPlayers:
 
 class TestGetSuggestedPublic:
     def test_suggested_empty(self, client):
-        resp = client.get("/suggested")
+        resp = client.get("/api/suggested")
         assert resp.status_code == 200
         assert resp.json()["player_ids"] == []
 
@@ -104,22 +104,22 @@ class TestGetSuggestedPublic:
         create_player_in_db(db, player_id=20, name="Bellingham")
 
         admin_data = register_user(client, email="adm@example.com")
-        me = client.get("/auth/me", headers=auth_header(admin_data["access_token"])).json()
+        me = client.get("/api/auth/me", headers=auth_header(admin_data["access_token"])).json()
         make_admin(db, me["id"])
         admin_token = client.post(
-            "/auth/login",
+            "/api/auth/login",
             json={"email": "adm@example.com", "password": "password123"},
         ).json()["access_token"]
 
         # Admin sets suggested
         client.put(
-            "/admin/suggested",
+            "/api/admin/suggested",
             json={"player_ids": [10, 20]},
             headers=auth_header(admin_token),
         )
 
         # Public endpoint (no auth)
-        resp = client.get("/suggested")
+        resp = client.get("/api/suggested")
         assert resp.status_code == 200
         ids = resp.json()["player_ids"]
         assert 10 in ids
@@ -127,5 +127,5 @@ class TestGetSuggestedPublic:
 
     def test_suggested_no_auth_required(self, client):
         """The /suggested endpoint should work without authentication."""
-        resp = client.get("/suggested")
+        resp = client.get("/api/suggested")
         assert resp.status_code == 200

@@ -1,5 +1,6 @@
 import enum
 from datetime import date, datetime
+from typing import Any
 
 from sqlalchemy import (
     Boolean,
@@ -11,10 +12,12 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    event,
     func,
 )
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.schema import DDL
 
 
 class Base(DeclarativeBase):
@@ -45,6 +48,15 @@ class Player(Base):
     position: Mapped[str | None] = mapped_column(String, nullable=True)
     nationality: Mapped[str | None] = mapped_column(String, nullable=True)
     date_of_birth: Mapped[date | None] = mapped_column(Date, nullable=True)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "player_id": self.player_id,
+            "name": self.name,
+            "position": self.position,
+            "nationality": self.nationality,
+            "date_of_birth": self.date_of_birth.isoformat() if self.date_of_birth else None,
+        }
 
 
 # ── User ──────────────────────────────────────────────────────────────
@@ -81,6 +93,15 @@ class User(Base):
         cascade="all, delete-orphan",
     )
 
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "email": self.email,
+            "display_name": self.display_name,
+            "role": self.role.value if isinstance(self.role, UserRole) else self.role,
+            "created_at": self.created_at.isoformat() if self.created_at else "",
+        }
+
 
 # ── Squad ─────────────────────────────────────────────────────────────
 
@@ -93,12 +114,23 @@ class Squad(Base):
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     name: Mapped[str] = mapped_column(String, nullable=False)
+    # NOTE: a proper join table (squad_players) would enforce FK integrity on
+    # player IDs and survive player deletions.  Left as ARRAY for now; migrate
+    # when Alembic is set up.
     player_ids: Mapped[list[int]] = mapped_column(ARRAY(Integer), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
     owner: Mapped["User"] = relationship(back_populates="squads")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "player_ids": self.player_ids,
+            "created_at": self.created_at.isoformat() if self.created_at else "",
+        }
 
 
 # ── Friendship ────────────────────────────────────────────────────────
@@ -128,6 +160,18 @@ class Friendship(Base):
     addressee: Mapped["User"] = relationship(
         foreign_keys=[friend_id], back_populates="received_requests"
     )
+
+
+# Prevent both (A→B) and (B→A) from existing — the app checks in Python,
+# but this index is the DB-level safety net against race conditions.
+event.listen(
+    Friendship.__table__,
+    "after_create",
+    DDL(
+        "CREATE UNIQUE INDEX IF NOT EXISTS uq_friendship_symmetric "
+        "ON friendships (LEAST(user_id, friend_id), GREATEST(user_id, friend_id))"
+    ),
+)
 
 
 # ── Suggested Players (admin-managed) ────────────────────────────────

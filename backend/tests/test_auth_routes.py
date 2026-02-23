@@ -10,7 +10,7 @@ from conftest import auth_header, register_user
 class TestRegister:
     def test_register_success(self, client):
         resp = client.post(
-            "/auth/register",
+            "/api/auth/register",
             json={
                 "email": "new@example.com",
                 "display_name": "New User",
@@ -26,14 +26,14 @@ class TestRegister:
         data = register_user(client, email="tok@example.com")
         token = data["access_token"]
 
-        me = client.get("/auth/me", headers=auth_header(token))
+        me = client.get("/api/auth/me", headers=auth_header(token))
         assert me.status_code == 200
         assert me.json()["email"] == "tok@example.com"
 
     def test_register_duplicate_email(self, client):
         register_user(client, email="dup@example.com")
         resp = client.post(
-            "/auth/register",
+            "/api/auth/register",
             json={
                 "email": "dup@example.com",
                 "display_name": "Dup",
@@ -46,7 +46,7 @@ class TestRegister:
     def test_register_duplicate_email_case_insensitive(self, client):
         register_user(client, email="case@example.com")
         resp = client.post(
-            "/auth/register",
+            "/api/auth/register",
             json={
                 "email": "CASE@example.com",
                 "display_name": "Case",
@@ -57,7 +57,7 @@ class TestRegister:
 
     def test_register_short_password(self, client):
         resp = client.post(
-            "/auth/register",
+            "/api/auth/register",
             json={
                 "email": "short@example.com",
                 "display_name": "Short",
@@ -69,7 +69,7 @@ class TestRegister:
 
     def test_register_invalid_email(self, client):
         resp = client.post(
-            "/auth/register",
+            "/api/auth/register",
             json={
                 "email": "not-an-email",
                 "display_name": "Bad",
@@ -82,7 +82,7 @@ class TestRegister:
         data = register_user(client, email="strip@example.com", display_name="  Padded  ")
         token = data["access_token"]
 
-        me = client.get("/auth/me", headers=auth_header(token))
+        me = client.get("/api/auth/me", headers=auth_header(token))
         assert me.json()["display_name"] == "Padded"
 
 
@@ -94,7 +94,7 @@ class TestLogin:
         register_user(client, email="login@example.com", password="mypass123")
 
         resp = client.post(
-            "/auth/login",
+            "/api/auth/login",
             json={"email": "login@example.com", "password": "mypass123"},
         )
         assert resp.status_code == 200
@@ -106,7 +106,7 @@ class TestLogin:
         register_user(client, email="wrong@example.com", password="correct")
 
         resp = client.post(
-            "/auth/login",
+            "/api/auth/login",
             json={"email": "wrong@example.com", "password": "incorrect"},
         )
         assert resp.status_code == 401
@@ -114,7 +114,7 @@ class TestLogin:
 
     def test_login_nonexistent_email(self, client):
         resp = client.post(
-            "/auth/login",
+            "/api/auth/login",
             json={"email": "ghost@example.com", "password": "whatever"},
         )
         assert resp.status_code == 401
@@ -123,7 +123,7 @@ class TestLogin:
         register_user(client, email="ci@example.com", password="pass123456")
 
         resp = client.post(
-            "/auth/login",
+            "/api/auth/login",
             json={"email": "CI@EXAMPLE.COM", "password": "pass123456"},
         )
         assert resp.status_code == 200
@@ -139,7 +139,7 @@ class TestMe:
             email="me@example.com",
             display_name="Me User",
         )
-        resp = client.get("/auth/me", headers=auth_header(data["access_token"]))
+        resp = client.get("/api/auth/me", headers=auth_header(data["access_token"]))
         assert resp.status_code == 200
         body = resp.json()
         assert body["email"] == "me@example.com"
@@ -149,9 +149,9 @@ class TestMe:
         assert "created_at" in body
 
     def test_me_unauthenticated(self, client):
-        resp = client.get("/auth/me")
+        resp = client.get("/api/auth/me")
         assert resp.status_code == 401
 
     def test_me_invalid_token(self, client):
-        resp = client.get("/auth/me", headers=auth_header("invalid.jwt.token"))
+        resp = client.get("/api/auth/me", headers=auth_header("invalid.jwt.token"))
         assert resp.status_code == 401

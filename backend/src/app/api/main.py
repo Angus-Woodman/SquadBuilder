@@ -5,9 +5,19 @@ from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from slowapi.errors import RateLimitExceeded
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+
+from app.auth import require_admin
+from app.db.models import SuggestedPlayer
+from app.db.session import get_db
+from app.rate_limit import limiter
 
 
 @asynccontextmanager
@@ -26,6 +36,19 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(title="Squad Builder API", lifespan=lifespan)
 
+# ── Rate limiting ─────────────────────────────────────────────────────
+
+app.state.limiter = limiter
+
+
+@app.exception_handler(RateLimitExceeded)
+async def _rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Rate limit exceeded. Try again later."},
+    )
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
@@ -34,39 +57,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Mount routers ─────────────────────────────────────────────────────
+# ── API router (all endpoints live under /api) ────────────────────────
 
 from app.api.admin_routes import router as admin_router  # noqa: E402
 from app.api.auth_routes import router as auth_router  # noqa: E402
 from app.api.friend_routes import router as friends_router  # noqa: E402
 from app.api.squad_routes import router as squads_router  # noqa: E402
 
-app.include_router(auth_router)
-app.include_router(squads_router)
-app.include_router(friends_router)
-app.include_router(admin_router)
+api = APIRouter(prefix="/api")
+
+api.include_router(auth_router)
+api.include_router(squads_router)
+api.include_router(friends_router)
+api.include_router(admin_router)
+
+
+# ── Inline endpoints ──────────────────────────────────────────────────
 
 
 class RefreshRequest(BaseModel):
     competition: list[str] = ["PL"]
 
 
-def _player_to_dict(p: Any) -> dict[str, Any]:
-    return {
-        "player_id": p.player_id,
-        "name": p.name,
-        "position": p.position,
-        "nationality": p.nationality,
-        "date_of_birth": p.date_of_birth.isoformat() if p.date_of_birth else None,
-    }
-
-
-@app.get("/health")
+@api.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.get("/players")
+@api.get("/players")
 def get_players(nationality: str | None = None, limit: int = 200) -> dict[str, Any]:
     if limit < 1 or limit > 2000:
         raise HTTPException(status_code=400, detail="limit must be between 1 and 2000")
@@ -74,29 +92,21 @@ def get_players(nationality: str | None = None, limit: int = 200) -> dict[str, A
     from app.db.queries import list_players
 
     players = list_players(nationality=nationality, limit=limit)
-    players_dicts = [_player_to_dict(p) for p in players]
-
-    return {"count": len(players_dicts), "players": players_dicts}
+    return {"count": len(players), "players": [p.to_dict() for p in players]}
 
 
-@app.get("/suggested")
-def get_suggested_public() -> dict[str, Any]:
+@api.get("/suggested")
+def get_suggested_public(db: Session = Depends(get_db)) -> dict[str, Any]:
     """Public endpoint: returns the list of suggested player IDs."""
-    from sqlalchemy import select
-
-    from app.db.models import SuggestedPlayer
-    from app.db.session import get_sessionmaker
-
-    Session = get_sessionmaker()
-    with Session() as db:
-        rows = db.scalars(
-            select(SuggestedPlayer.player_id).where(SuggestedPlayer.is_active.is_(True))
-        ).all()
+    rows = db.scalars(
+        select(SuggestedPlayer.player_id).where(SuggestedPlayer.is_active.is_(True))
+    ).all()
     return {"player_ids": list(rows)}
 
 
-@app.post("/refresh")
-def refresh(req: RefreshRequest) -> dict[str, Any]:
+@api.post("/refresh")
+def refresh(req: RefreshRequest, _admin=Depends(require_admin)) -> dict[str, Any]:
+    """Re-fetch player data from the football-data API (admin only)."""
     try:
         from app.db.bootstrap import create_tables
         from app.db.store import upsert_players
@@ -118,3 +128,6 @@ def refresh(req: RefreshRequest) -> dict[str, Any]:
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+app.include_router(api)

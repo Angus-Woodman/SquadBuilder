@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { fetchSquad, createSquad, type SquadDetail } from "../api/client";
 import type { Player } from "../types/player";
 import { positionGroup, GROUP_LABELS, type PositionGroup } from "../utils/positions";
+import { NavBar } from "./NavBar";
 import "./Dashboard.css";
 import "./SquadView.css";
 
@@ -18,7 +19,7 @@ function groupPlayers(players: Player[]): Record<PositionGroup, Player[]> {
 /* ── Component ────────────────────────────────────────────────────── */
 
 export function SquadViewPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -61,7 +62,7 @@ export function SquadViewPage() {
   if (loading) {
     return (
       <div className="dashboard-page">
-        <SquadViewNav user={user} logout={logout} />
+        <NavBar active="squads" />
         <div className="dashboard-content"><p className="dashboard-info">Loading…</p></div>
       </div>
     );
@@ -70,7 +71,7 @@ export function SquadViewPage() {
   if (error || !squad) {
     return (
       <div className="dashboard-page">
-        <SquadViewNav user={user} logout={logout} />
+        <NavBar active="squads" />
         <div className="dashboard-content">
           <p className="dashboard-error">{error ?? "Squad not found"}</p>
           <Link to="/squads" className="dashboard-cta" style={{ marginTop: "1rem", display: "inline-block" }}>← Back to squads</Link>
@@ -83,7 +84,7 @@ export function SquadViewPage() {
 
   return (
     <div className="dashboard-page">
-      <SquadViewNav user={user} logout={logout} />
+      <NavBar active="squads" />
 
       <div className="sv-content">
         <div className="sv-header">
@@ -132,23 +133,5 @@ export function SquadViewPage() {
         </div>
       </div>
     </div>
-  );
-}
-
-/* ── Shared nav ───────────────────────────────────────────────────── */
-
-function SquadViewNav({ user, logout }: { user: ReturnType<typeof useAuth>["user"]; logout: () => void }) {
-  return (
-    <nav className="dashboard-nav">
-      <Link to="/" className="dashboard-brand">⚽ Squad Builder</Link>
-      <div className="dashboard-nav-links">
-        <Link to="/builder">Builder</Link>
-        <Link to="/squads" className="active">My Squads</Link>
-        <Link to="/friends">Friends</Link>
-        {user?.role === "admin" && <Link to="/admin">Admin</Link>}
-        {user && <span className="dashboard-user">{user.display_name}</span>}
-        {user && <button className="dashboard-logout" onClick={logout}>Log out</button>}
-      </div>
-    </nav>
   );
 }

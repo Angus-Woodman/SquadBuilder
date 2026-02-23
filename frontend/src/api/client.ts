@@ -1,5 +1,9 @@
 import type { PlayersResponse } from "../types/player";
 
+// ── Base URL prefix ──────────────────────────────────────────────────
+
+const API = "/api";
+
 // ── Token management ─────────────────────────────────────────────────
 
 const TOKEN_KEY = "squad-builder:token";
@@ -31,7 +35,7 @@ export async function fetchPlayers(
   if (params.nationality?.trim()) qs.set("nationality", params.nationality.trim());
   if (params.limit) qs.set("limit", String(params.limit));
 
-  const res = await fetch(`/players?${qs.toString()}`, { signal });
+  const res = await fetch(`${API}/players?${qs.toString()}`, { signal });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`GET /players failed (${res.status}): ${text}`);
@@ -40,9 +44,9 @@ export async function fetchPlayers(
 }
 
 export async function refreshData(competition: string[] = ["PL"]): Promise<void> {
-  const res = await fetch("/refresh", {
+  const res = await fetch(`${API}/refresh`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ competition }),
   });
   if (!res.ok) {
@@ -52,7 +56,7 @@ export async function refreshData(competition: string[] = ["PL"]): Promise<void>
 }
 
 export async function fetchSuggestedIds(): Promise<number[]> {
-  const res = await fetch("/suggested");
+  const res = await fetch(`${API}/suggested`);
   if (!res.ok) return [];
   const data = await res.json();
   return data.player_ids ?? [];
@@ -74,7 +78,7 @@ export async function register(
   displayName: string,
   password: string,
 ): Promise<AuthResponse> {
-  const res = await fetch("/auth/register", {
+  const res = await fetch(`${API}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, display_name: displayName, password }),
@@ -87,7 +91,7 @@ export async function register(
 }
 
 export async function login(email: string, password: string): Promise<AuthResponse> {
-  const res = await fetch("/auth/login", {
+  const res = await fetch(`${API}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -100,7 +104,7 @@ export async function login(email: string, password: string): Promise<AuthRespon
 }
 
 export async function fetchMe(): Promise<UserInfo> {
-  const res = await fetch("/auth/me", { headers: authHeaders() });
+  const res = await fetch(`${API}/auth/me`, { headers: authHeaders() });
   if (!res.ok) throw new Error("Not authenticated");
   return res.json();
 }
@@ -121,19 +125,19 @@ export type SquadDetail = SavedSquad & {
 };
 
 export async function fetchSquads(): Promise<SavedSquad[]> {
-  const res = await fetch("/squads/", { headers: authHeaders() });
+  const res = await fetch(`${API}/squads/`, { headers: authHeaders() });
   if (!res.ok) throw new Error("Failed to load squads");
   return res.json();
 }
 
 export async function fetchSquad(squadId: number): Promise<SquadDetail> {
-  const res = await fetch(`/squads/${squadId}`, { headers: authHeaders() });
+  const res = await fetch(`${API}/squads/${squadId}`, { headers: authHeaders() });
   if (!res.ok) throw new Error("Failed to load squad");
   return res.json();
 }
 
 export async function createSquad(name: string, playerIds: number[]): Promise<SavedSquad> {
-  const res = await fetch("/squads/", {
+  const res = await fetch(`${API}/squads/`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ name, player_ids: playerIds }),
@@ -146,7 +150,7 @@ export async function createSquad(name: string, playerIds: number[]): Promise<Sa
 }
 
 export async function updateSquad(squadId: number, name: string, playerIds: number[]): Promise<SavedSquad> {
-  const res = await fetch(`/squads/${squadId}`, {
+  const res = await fetch(`${API}/squads/${squadId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ name, player_ids: playerIds }),
@@ -159,7 +163,7 @@ export async function updateSquad(squadId: number, name: string, playerIds: numb
 }
 
 export async function deleteSquad(squadId: number): Promise<void> {
-  const res = await fetch(`/squads/${squadId}`, {
+  const res = await fetch(`${API}/squads/${squadId}`, {
     method: "DELETE",
     headers: authHeaders(),
   });
@@ -178,13 +182,13 @@ export type FriendInfo = {
 };
 
 export async function fetchFriends(): Promise<FriendInfo[]> {
-  const res = await fetch("/friends/", { headers: authHeaders() });
+  const res = await fetch(`${API}/friends/`, { headers: authHeaders() });
   if (!res.ok) throw new Error("Failed to load friends");
   return res.json();
 }
 
 export async function sendFriendRequest(email: string): Promise<FriendInfo> {
-  const res = await fetch("/friends/request", {
+  const res = await fetch(`${API}/friends/request`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ email }),
@@ -197,7 +201,7 @@ export async function sendFriendRequest(email: string): Promise<FriendInfo> {
 }
 
 export async function acceptFriendRequest(friendshipId: number): Promise<FriendInfo> {
-  const res = await fetch(`/friends/${friendshipId}/accept`, {
+  const res = await fetch(`${API}/friends/${friendshipId}/accept`, {
     method: "PUT",
     headers: authHeaders(),
   });
@@ -206,7 +210,7 @@ export async function acceptFriendRequest(friendshipId: number): Promise<FriendI
 }
 
 export async function removeFriend(friendshipId: number): Promise<void> {
-  const res = await fetch(`/friends/${friendshipId}`, {
+  const res = await fetch(`${API}/friends/${friendshipId}`, {
     method: "DELETE",
     headers: authHeaders(),
   });
@@ -214,7 +218,7 @@ export async function removeFriend(friendshipId: number): Promise<void> {
 }
 
 export async function fetchFriendSquads(friendUserId: number): Promise<SavedSquad[]> {
-  const res = await fetch(`/friends/${friendUserId}/squads`, { headers: authHeaders() });
+  const res = await fetch(`${API}/friends/${friendUserId}/squads`, { headers: authHeaders() });
   if (!res.ok) throw new Error("Failed to load friend squads");
   return res.json();
 }
@@ -237,13 +241,13 @@ export type AdminUser = {
 };
 
 export async function adminGetSuggested(): Promise<AdminSuggestedPlayer[]> {
-  const res = await fetch("/admin/suggested", { headers: authHeaders() });
+  const res = await fetch(`${API}/admin/suggested`, { headers: authHeaders() });
   if (!res.ok) throw new Error("Failed to load suggested list");
   return res.json();
 }
 
 export async function adminSetSuggested(playerIds: number[]): Promise<void> {
-  const res = await fetch("/admin/suggested", {
+  const res = await fetch(`${API}/admin/suggested`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ player_ids: playerIds }),
@@ -252,13 +256,13 @@ export async function adminSetSuggested(playerIds: number[]): Promise<void> {
 }
 
 export async function adminGetUsers(): Promise<AdminUser[]> {
-  const res = await fetch("/admin/users", { headers: authHeaders() });
+  const res = await fetch(`${API}/admin/users`, { headers: authHeaders() });
   if (!res.ok) throw new Error("Failed to load users");
   return res.json();
 }
 
 export async function adminSetUserRole(userId: number, role: string): Promise<void> {
-  const res = await fetch(`/admin/users/${userId}/role?role=${role}`, {
+  const res = await fetch(`${API}/admin/users/${userId}/role?role=${role}`, {
     method: "PUT",
     headers: authHeaders(),
   });
@@ -271,7 +275,7 @@ export async function adminCreateUser(
   password: string,
   role: string,
 ): Promise<AdminUser> {
-  const res = await fetch("/admin/users", {
+  const res = await fetch(`${API}/admin/users`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ email, display_name: displayName, password, role }),
@@ -284,7 +288,7 @@ export async function adminCreateUser(
 }
 
 export async function adminDeleteUser(userId: number): Promise<void> {
-  const res = await fetch(`/admin/users/${userId}`, {
+  const res = await fetch(`${API}/admin/users/${userId}`, {
     method: "DELETE",
     headers: authHeaders(),
   });
@@ -303,7 +307,7 @@ export type AdminPlayer = {
 };
 
 export async function adminSearchPlayers(query: string): Promise<AdminPlayer[]> {
-  const res = await fetch(`/admin/players/search?q=${encodeURIComponent(query)}`, {
+  const res = await fetch(`${API}/admin/players/search?q=${encodeURIComponent(query)}`, {
     headers: authHeaders(),
   });
   if (!res.ok) throw new Error("Failed to search players");
@@ -314,7 +318,7 @@ export async function adminUpdatePlayer(
   playerId: number,
   data: Partial<Omit<AdminPlayer, "player_id">>,
 ): Promise<AdminPlayer> {
-  const res = await fetch(`/admin/players/${playerId}`, {
+  const res = await fetch(`${API}/admin/players/${playerId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(data),

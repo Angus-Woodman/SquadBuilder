@@ -1,7 +1,7 @@
 """Authentication & authorisation helpers.
 
 • Password hashing via bcrypt
-• JWT creation / verification via python-jose
+• JWT creation / verification via PyJWT
 • FastAPI dependency callables for extracting the current user & checking admin role
 """
 
@@ -11,13 +11,15 @@ import os
 from datetime import UTC, datetime, timedelta
 
 import bcrypt
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt
+from jwt.exceptions import InvalidTokenError
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.db.models import User, UserRole
-from app.db.session import get_sessionmaker
+from app.db.session import get_db
 
 # ── Password hashing ─────────────────────────────────────────────────
 
@@ -65,25 +67,22 @@ _bearer_scheme = HTTPBearer()
 
 def get_current_user(
     creds: HTTPAuthorizationCredentials = Depends(_bearer_scheme),
+    db: Session = Depends(get_db),
 ) -> User:
     """Decode the JWT and return the full User ORM object."""
     try:
         payload = decode_access_token(creds.credentials)
         user_id = int(payload["sub"])
-    except (JWTError, KeyError, ValueError) as exc:
+    except (InvalidTokenError, KeyError, ValueError) as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
         ) from exc
 
-    Session = get_sessionmaker()
-    with Session() as db:
-        user = db.scalar(select(User).where(User.id == user_id))
-        if user is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-        # Detach from session so caller can use the object outside the `with` block
-        db.expunge(user)
-        return user
+    user = db.scalar(select(User).where(User.id == user_id))
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    return user
 
 
 def require_admin(user: User = Depends(get_current_user)) -> User:

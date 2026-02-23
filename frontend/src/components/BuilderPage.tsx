@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import { fetchPlayers, fetchSuggestedIds, createSquad, updateSquad } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { NavBar } from "./NavBar";
 import { PlayerFilters } from "./PlayerFilters";
 import { PlayerTable } from "./PlayerTable";
 import { SquadPanel } from "./SquadPanel";
@@ -19,7 +20,7 @@ import "./Dashboard.css";
 import "./Builder.css";
 
 export function BuilderPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const location = useLocation();
   const navState = location.state as { editSquadId?: number; editPlayerIds?: number[]; editSquadName?: string } | null;
 
@@ -154,22 +155,7 @@ export function BuilderPage() {
 
   return (
     <div className="dashboard-page">
-      <nav className="dashboard-nav">
-        <Link to="/" className="dashboard-brand">⚽ Squad Builder</Link>
-        <div className="dashboard-nav-links">
-          <Link to="/builder" className="active">Builder</Link>
-          {user && (
-            <>
-              <Link to="/squads">My Squads</Link>
-              <Link to="/friends">Friends</Link>
-              {user.role === "admin" && <Link to="/admin">Admin</Link>}
-              <span className="dashboard-user">{user.display_name}</span>
-              <button className="dashboard-logout" onClick={logout}>Log out</button>
-            </>
-          )}
-          {!user && <Link to="/login">Log in</Link>}
-        </div>
-      </nav>
+      <NavBar active="builder" />
 
       <div className="dashboard-content dashboard-content--wide">
         <PlayerFilters

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import {
   fetchFriends,
   sendFriendRequest,
@@ -10,15 +9,16 @@ import {
   type FriendInfo,
   type SavedSquad,
 } from "../api/client";
+import { NavBar } from "./NavBar";
 import "./Dashboard.css";
 
 export function FriendsPage() {
-  const { user, logout } = useAuth();
   const [friends, setFriends] = useState<FriendInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
   const [sendError, setSendError] = useState<string | null>(null);
   const [sendSuccess, setSendSuccess] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   // For viewing a friend's squads
   const [viewingSquads, setViewingSquads] = useState<{
@@ -33,7 +33,7 @@ export function FriendsPage() {
   function loadFriends() {
     fetchFriends()
       .then(setFriends)
-      .catch(() => {})
+      .catch((e) => setActionError(e instanceof Error ? e.message : "Failed to load friends"))
       .finally(() => setLoading(false));
   }
 
@@ -52,22 +52,37 @@ export function FriendsPage() {
   }
 
   async function handleAccept(friendshipId: number) {
-    const updated = await acceptFriendRequest(friendshipId);
-    setFriends((prev) =>
-      prev.map((f) => (f.friendship_id === friendshipId ? updated : f))
-    );
+    setActionError(null);
+    try {
+      const updated = await acceptFriendRequest(friendshipId);
+      setFriends((prev) =>
+        prev.map((f) => (f.friendship_id === friendshipId ? updated : f))
+      );
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Failed to accept request");
+    }
   }
 
   async function handleRemove(friendshipId: number) {
     if (!confirm("Remove this friend?")) return;
-    await removeFriend(friendshipId);
-    setFriends((prev) => prev.filter((f) => f.friendship_id !== friendshipId));
-    setViewingSquads(null);
+    setActionError(null);
+    try {
+      await removeFriend(friendshipId);
+      setFriends((prev) => prev.filter((f) => f.friendship_id !== friendshipId));
+      setViewingSquads(null);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Failed to remove friend");
+    }
   }
 
   async function handleViewSquads(friendUserId: number, friendName: string) {
-    const squads = await fetchFriendSquads(friendUserId);
-    setViewingSquads({ friendName, squads });
+    setActionError(null);
+    try {
+      const squads = await fetchFriendSquads(friendUserId);
+      setViewingSquads({ friendName, squads });
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Failed to load friend's squads");
+    }
   }
 
   const accepted = friends.filter((f) => f.status === "accepted");
@@ -80,20 +95,11 @@ export function FriendsPage() {
 
   return (
     <div className="dashboard-page">
-      <nav className="dashboard-nav">
-        <Link to="/" className="dashboard-brand">⚽ Squad Builder</Link>
-        <div className="dashboard-nav-links">
-          <Link to="/builder">Builder</Link>
-          <Link to="/squads">My Squads</Link>
-          <Link to="/friends" className="active">Friends</Link>
-          {user?.role === "admin" && <Link to="/admin">Admin</Link>}
-          {user && <span className="dashboard-user">{user.display_name}</span>}
-          {user && <button className="dashboard-logout" onClick={logout}>Log out</button>}
-        </div>
-      </nav>
+      <NavBar active="friends" />
 
       <div className="dashboard-content">
         <h1>Friends</h1>
+        {actionError && <p className="dashboard-error">{actionError}</p>}
 
         {/* Add friend form */}
         <form className="friend-add-form" onSubmit={handleSend}>

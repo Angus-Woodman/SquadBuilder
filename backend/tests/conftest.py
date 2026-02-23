@@ -96,9 +96,16 @@ def client():
     from fastapi.testclient import TestClient
 
     from app.api.main import app
+    from app.rate_limit import limiter
+
+    # Disable rate limiting during tests so registration-heavy suites
+    # don't hit the 10/minute cap.
+    limiter.enabled = False
 
     with TestClient(app) as c:
         yield c
+
+    limiter.enabled = True
 
 
 # ---------------------------------------------------------------------------
@@ -126,7 +133,7 @@ def register_user(
 ) -> dict[str, Any]:
     """Register a user via the API and return the full response JSON."""
     resp = client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={"email": email, "display_name": display_name, "password": password},
     )
     assert resp.status_code == 201, resp.text

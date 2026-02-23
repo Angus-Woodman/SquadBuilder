@@ -24,7 +24,7 @@ class TestCreateSquad:
         token, pids = _setup_user_with_players(client, db)
 
         resp = client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "My Squad", "player_ids": pids},
             headers=auth_header(token),
         )
@@ -39,7 +39,7 @@ class TestCreateSquad:
         token, pids = _setup_user_with_players(client, db)
 
         resp = client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "   ", "player_ids": pids},
             headers=auth_header(token),
         )
@@ -50,7 +50,7 @@ class TestCreateSquad:
         token, _ = _setup_user_with_players(client, db)
 
         resp = client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "Empty", "player_ids": []},
             headers=auth_header(token),
         )
@@ -65,7 +65,7 @@ class TestCreateSquad:
             create_player_in_db(db, player_id=i, name=f"Player {i}")
 
         resp = client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "Too Big", "player_ids": list(range(1, 28))},
             headers=auth_header(token),
         )
@@ -73,7 +73,7 @@ class TestCreateSquad:
         assert "26" in resp.json()["detail"]
 
     def test_create_squad_unauthenticated(self, client):
-        resp = client.post("/squads/", json={"name": "X", "player_ids": [1]})
+        resp = client.post("/api/squads/", json={"name": "X", "player_ids": [1]})
         assert resp.status_code == 401
 
 
@@ -83,7 +83,7 @@ class TestCreateSquad:
 class TestListSquads:
     def test_list_squads_empty(self, client):
         token = register_user(client)["access_token"]
-        resp = client.get("/squads/", headers=auth_header(token))
+        resp = client.get("/api/squads/", headers=auth_header(token))
         assert resp.status_code == 200
         assert resp.json() == []
 
@@ -93,35 +93,35 @@ class TestListSquads:
 
         # User A creates a squad
         client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "A's Squad", "player_ids": pids[:3]},
             headers=auth_header(token_a),
         )
 
         # User B should see nothing
-        resp = client.get("/squads/", headers=auth_header(token_b))
+        resp = client.get("/api/squads/", headers=auth_header(token_b))
         assert resp.status_code == 200
         assert resp.json() == []
 
         # User A should see their squad
-        resp = client.get("/squads/", headers=auth_header(token_a))
+        resp = client.get("/api/squads/", headers=auth_header(token_a))
         assert len(resp.json()) == 1
 
     def test_list_squads_multiple(self, client, db):
         token, pids = _setup_user_with_players(client, db)
 
         client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "First", "player_ids": pids[:2]},
             headers=auth_header(token),
         )
         client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "Second", "player_ids": pids[2:4]},
             headers=auth_header(token),
         )
 
-        resp = client.get("/squads/", headers=auth_header(token))
+        resp = client.get("/api/squads/", headers=auth_header(token))
         assert len(resp.json()) == 2
 
 
@@ -133,13 +133,13 @@ class TestGetSquad:
         token, pids = _setup_user_with_players(client, db)
 
         create_resp = client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "Test", "player_ids": pids[:3]},
             headers=auth_header(token),
         )
         squad_id = create_resp.json()["id"]
 
-        resp = client.get(f"/squads/{squad_id}", headers=auth_header(token))
+        resp = client.get(f"/api/squads/{squad_id}", headers=auth_header(token))
         assert resp.status_code == 200
         body = resp.json()
         assert body["name"] == "Test"
@@ -148,7 +148,7 @@ class TestGetSquad:
 
     def test_get_nonexistent_squad(self, client):
         token = register_user(client)["access_token"]
-        resp = client.get("/squads/99999", headers=auth_header(token))
+        resp = client.get("/api/squads/99999", headers=auth_header(token))
         assert resp.status_code == 404
 
     def test_get_other_users_squad_denied(self, client, db):
@@ -156,14 +156,14 @@ class TestGetSquad:
         token_b = register_user(client, email="other@example.com")["access_token"]
 
         create_resp = client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "Private", "player_ids": pids[:2]},
             headers=auth_header(token_a),
         )
         squad_id = create_resp.json()["id"]
 
         # User B cannot see User A's squad (not friends)
-        resp = client.get(f"/squads/{squad_id}", headers=auth_header(token_b))
+        resp = client.get(f"/api/squads/{squad_id}", headers=auth_header(token_b))
         assert resp.status_code == 404
 
     def test_get_friend_squad_allowed(self, client, db):
@@ -173,7 +173,7 @@ class TestGetSquad:
 
         # Alice creates a squad
         create_resp = client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "Alice Squad", "player_ids": pids[:2]},
             headers=auth_header(token_a),
         )
@@ -181,18 +181,18 @@ class TestGetSquad:
 
         # Alice sends friend request to Bob
         client.post(
-            "/friends/request",
+            "/api/friends/request",
             json={"email": "bob@example.com"},
             headers=auth_header(token_a),
         )
 
         # Bob accepts
-        friends_resp = client.get("/friends/", headers=auth_header(token_b))
+        friends_resp = client.get("/api/friends/", headers=auth_header(token_b))
         friendship_id = friends_resp.json()[0]["friendship_id"]
-        client.put(f"/friends/{friendship_id}/accept", headers=auth_header(token_b))
+        client.put(f"/api/friends/{friendship_id}/accept", headers=auth_header(token_b))
 
         # Bob can now view Alice's squad
-        resp = client.get(f"/squads/{squad_id}", headers=auth_header(token_b))
+        resp = client.get(f"/api/squads/{squad_id}", headers=auth_header(token_b))
         assert resp.status_code == 200
         assert resp.json()["name"] == "Alice Squad"
 
@@ -205,14 +205,14 @@ class TestUpdateSquad:
         token, pids = _setup_user_with_players(client, db)
 
         create_resp = client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "Original", "player_ids": pids[:2]},
             headers=auth_header(token),
         )
         squad_id = create_resp.json()["id"]
 
         resp = client.put(
-            f"/squads/{squad_id}",
+            f"/api/squads/{squad_id}",
             json={"name": "Updated", "player_ids": pids[:4]},
             headers=auth_header(token),
         )
@@ -225,14 +225,14 @@ class TestUpdateSquad:
         token_b = register_user(client, email="upd_b@example.com")["access_token"]
 
         create_resp = client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "A's Squad", "player_ids": pids[:2]},
             headers=auth_header(token_a),
         )
         squad_id = create_resp.json()["id"]
 
         resp = client.put(
-            f"/squads/{squad_id}",
+            f"/api/squads/{squad_id}",
             json={"name": "Hacked", "player_ids": pids[:2]},
             headers=auth_header(token_b),
         )
@@ -242,7 +242,7 @@ class TestUpdateSquad:
         token, pids = _setup_user_with_players(client, db)
 
         create_resp = client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "Val", "player_ids": pids[:2]},
             headers=auth_header(token),
         )
@@ -250,7 +250,7 @@ class TestUpdateSquad:
 
         # Empty name
         resp = client.put(
-            f"/squads/{squad_id}",
+            f"/api/squads/{squad_id}",
             json={"name": "  ", "player_ids": pids[:2]},
             headers=auth_header(token),
         )
@@ -265,17 +265,17 @@ class TestDeleteSquad:
         token, pids = _setup_user_with_players(client, db)
 
         create_resp = client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "Delete Me", "player_ids": pids[:2]},
             headers=auth_header(token),
         )
         squad_id = create_resp.json()["id"]
 
-        resp = client.delete(f"/squads/{squad_id}", headers=auth_header(token))
+        resp = client.delete(f"/api/squads/{squad_id}", headers=auth_header(token))
         assert resp.status_code == 204
 
         # Verify it's gone
-        resp = client.get("/squads/", headers=auth_header(token))
+        resp = client.get("/api/squads/", headers=auth_header(token))
         assert len(resp.json()) == 0
 
     def test_delete_other_users_squad(self, client, db):
@@ -283,16 +283,16 @@ class TestDeleteSquad:
         token_b = register_user(client, email="del_b@example.com")["access_token"]
 
         create_resp = client.post(
-            "/squads/",
+            "/api/squads/",
             json={"name": "A's Squad", "player_ids": pids[:2]},
             headers=auth_header(token_a),
         )
         squad_id = create_resp.json()["id"]
 
-        resp = client.delete(f"/squads/{squad_id}", headers=auth_header(token_b))
+        resp = client.delete(f"/api/squads/{squad_id}", headers=auth_header(token_b))
         assert resp.status_code == 404
 
     def test_delete_nonexistent_squad(self, client):
         token = register_user(client)["access_token"]
-        resp = client.delete("/squads/99999", headers=auth_header(token))
+        resp = client.delete("/api/squads/99999", headers=auth_header(token))
         assert resp.status_code == 404

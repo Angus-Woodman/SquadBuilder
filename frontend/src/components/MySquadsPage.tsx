@@ -1,49 +1,44 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import {
   fetchSquads,
   deleteSquad,
   type SavedSquad,
 } from "../api/client";
+import { NavBar } from "./NavBar";
 import "./Dashboard.css";
 
 export function MySquadsPage() {
-  const { user, logout } = useAuth();
   const [squads, setSquads] = useState<SavedSquad[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSquads()
       .then(setSquads)
-      .catch(() => {})
+      .catch((e) => setError(e instanceof Error ? e.message : "Failed to load squads"))
       .finally(() => setLoading(false));
   }, []);
 
   async function handleDelete(id: number) {
     if (!confirm("Delete this squad?")) return;
-    await deleteSquad(id);
-    setSquads((prev) => prev.filter((s) => s.id !== id));
+    try {
+      await deleteSquad(id);
+      setSquads((prev) => prev.filter((s) => s.id !== id));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete squad");
+    }
   }
 
   return (
     <div className="dashboard-page">
-      <nav className="dashboard-nav">
-        <Link to="/" className="dashboard-brand">⚽ Squad Builder</Link>
-        <div className="dashboard-nav-links">
-          <Link to="/builder">Builder</Link>
-          <Link to="/squads" className="active">My Squads</Link>
-          <Link to="/friends">Friends</Link>
-          {user?.role === "admin" && <Link to="/admin">Admin</Link>}
-          {user && <span className="dashboard-user">{user.display_name}</span>}
-          {user && <button className="dashboard-logout" onClick={logout}>Log out</button>}
-        </div>
-      </nav>
+      <NavBar active="squads" />
 
       <div className="dashboard-content">
         <h1>My Saved Squads</h1>
 
         {loading && <p className="dashboard-info">Loading…</p>}
+        {error && <p className="dashboard-error">{error}</p>}
 
         {!loading && squads.length === 0 && (
           <div className="dashboard-empty">

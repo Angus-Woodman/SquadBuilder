@@ -10,12 +10,12 @@ def _admin_token(client, db, *, email="admin@example.com") -> str:
     data = register_user(client, email=email, display_name="Admin")
     token = data["access_token"]
     # Get user ID from /auth/me
-    me = client.get("/auth/me", headers=auth_header(token)).json()
+    me = client.get("/api/auth/me", headers=auth_header(token)).json()
     make_admin(db, me["id"])
 
     # Re-login to get a fresh token with the admin role
     resp = client.post(
-        "/auth/login",
+        "/api/auth/login",
         json={"email": email, "password": "password123"},
     )
     return resp.json()["access_token"]
@@ -31,7 +31,7 @@ def _regular_token(client, *, email="user@example.com") -> str:
 class TestSuggested:
     def test_get_suggested_empty(self, client, db):
         token = _admin_token(client, db)
-        resp = client.get("/admin/suggested", headers=auth_header(token))
+        resp = client.get("/api/admin/suggested", headers=auth_header(token))
         assert resp.status_code == 200
         assert resp.json() == []
 
@@ -44,7 +44,7 @@ class TestSuggested:
 
         # Set suggested
         resp = client.put(
-            "/admin/suggested",
+            "/api/admin/suggested",
             json={"player_ids": [10, 20]},
             headers=auth_header(token),
         )
@@ -52,7 +52,7 @@ class TestSuggested:
         assert resp.json()["count"] == 2
 
         # Get suggested
-        resp = client.get("/admin/suggested", headers=auth_header(token))
+        resp = client.get("/api/admin/suggested", headers=auth_header(token))
         assert resp.status_code == 200
         suggested = resp.json()
         assert len(suggested) == 2
@@ -68,23 +68,23 @@ class TestSuggested:
         create_player_in_db(db, player_id=30, name="Player C")
 
         client.put(
-            "/admin/suggested",
+            "/api/admin/suggested",
             json={"player_ids": [10, 20]},
             headers=auth_header(token),
         )
         client.put(
-            "/admin/suggested",
+            "/api/admin/suggested",
             json={"player_ids": [30]},
             headers=auth_header(token),
         )
 
-        suggested = client.get("/admin/suggested", headers=auth_header(token)).json()
+        suggested = client.get("/api/admin/suggested", headers=auth_header(token)).json()
         assert len(suggested) == 1
         assert suggested[0]["name"] == "Player C"
 
     def test_suggested_non_admin_forbidden(self, client, db):
         token = _regular_token(client)
-        resp = client.get("/admin/suggested", headers=auth_header(token))
+        resp = client.get("/api/admin/suggested", headers=auth_header(token))
         assert resp.status_code == 403
 
 
@@ -96,7 +96,7 @@ class TestUserManagement:
         token = _admin_token(client, db)
         register_user(client, email="other@example.com")
 
-        resp = client.get("/admin/users", headers=auth_header(token))
+        resp = client.get("/api/admin/users", headers=auth_header(token))
         assert resp.status_code == 200
         users = resp.json()
         assert len(users) >= 2  # admin + other
@@ -108,7 +108,7 @@ class TestUserManagement:
         token = _admin_token(client, db)
 
         resp = client.post(
-            "/admin/users",
+            "/api/admin/users",
             json={
                 "email": "created@example.com",
                 "display_name": "Created User",
@@ -126,7 +126,7 @@ class TestUserManagement:
         token = _admin_token(client, db)
 
         client.post(
-            "/admin/users",
+            "/api/admin/users",
             json={
                 "email": "dup@example.com",
                 "display_name": "First",
@@ -135,7 +135,7 @@ class TestUserManagement:
             headers=auth_header(token),
         )
         resp = client.post(
-            "/admin/users",
+            "/api/admin/users",
             json={
                 "email": "dup@example.com",
                 "display_name": "Second",
@@ -149,7 +149,7 @@ class TestUserManagement:
         token = _admin_token(client, db)
 
         resp = client.post(
-            "/admin/users",
+            "/api/admin/users",
             json={
                 "email": "bad@example.com",
                 "display_name": "Bad Role",
@@ -165,7 +165,7 @@ class TestUserManagement:
 
         # Create a target user
         resp = client.post(
-            "/admin/users",
+            "/api/admin/users",
             json={
                 "email": "target@example.com",
                 "display_name": "Target",
@@ -175,21 +175,21 @@ class TestUserManagement:
         )
         target_id = resp.json()["id"]
 
-        resp = client.delete(f"/admin/users/{target_id}", headers=auth_header(token))
+        resp = client.delete(f"/api/admin/users/{target_id}", headers=auth_header(token))
         assert resp.status_code == 200
         assert resp.json()["status"] == "ok"
 
     def test_delete_self_forbidden(self, client, db):
         token = _admin_token(client, db)
-        me = client.get("/auth/me", headers=auth_header(token)).json()
+        me = client.get("/api/auth/me", headers=auth_header(token)).json()
 
-        resp = client.delete(f"/admin/users/{me['id']}", headers=auth_header(token))
+        resp = client.delete(f"/api/admin/users/{me['id']}", headers=auth_header(token))
         assert resp.status_code == 400
         assert "own account" in resp.json()["detail"].lower()
 
     def test_delete_nonexistent_user(self, client, db):
         token = _admin_token(client, db)
-        resp = client.delete("/admin/users/99999", headers=auth_header(token))
+        resp = client.delete("/api/admin/users/99999", headers=auth_header(token))
         assert resp.status_code == 404
 
     def test_set_user_role(self, client, db):
@@ -197,7 +197,7 @@ class TestUserManagement:
 
         # Create a regular user
         resp = client.post(
-            "/admin/users",
+            "/api/admin/users",
             json={
                 "email": "promote@example.com",
                 "display_name": "Promotable",
@@ -209,7 +209,7 @@ class TestUserManagement:
 
         # Promote to admin
         resp = client.put(
-            f"/admin/users/{user_id}/role?role=admin",
+            f"/api/admin/users/{user_id}/role?role=admin",
             headers=auth_header(token),
         )
         assert resp.status_code == 200
@@ -217,7 +217,7 @@ class TestUserManagement:
 
         # Demote back
         resp = client.put(
-            f"/admin/users/{user_id}/role?role=user",
+            f"/api/admin/users/{user_id}/role?role=user",
             headers=auth_header(token),
         )
         assert resp.json()["role"] == "user"
@@ -226,7 +226,7 @@ class TestUserManagement:
         token = _admin_token(client, db)
 
         resp = client.post(
-            "/admin/users",
+            "/api/admin/users",
             json={
                 "email": "badrole@example.com",
                 "display_name": "Bad",
@@ -237,14 +237,14 @@ class TestUserManagement:
         user_id = resp.json()["id"]
 
         resp = client.put(
-            f"/admin/users/{user_id}/role?role=superadmin",
+            f"/api/admin/users/{user_id}/role?role=superadmin",
             headers=auth_header(token),
         )
         assert resp.status_code == 400
 
     def test_non_admin_cannot_list_users(self, client):
         token = _regular_token(client)
-        resp = client.get("/admin/users", headers=auth_header(token))
+        resp = client.get("/api/admin/users", headers=auth_header(token))
         assert resp.status_code == 403
 
 
@@ -260,7 +260,7 @@ class TestPlayerManagement:
         create_player_in_db(db, player_id=3, name="Jude Bellingham")
 
         resp = client.get(
-            "/admin/players/search?q=Harry",
+            "/api/admin/players/search?q=Harry",
             headers=auth_header(token),
         )
         assert resp.status_code == 200
@@ -275,7 +275,7 @@ class TestPlayerManagement:
 
         create_player_in_db(db, player_id=1, name="Some Player")
 
-        resp = client.get("/admin/players/search?q=", headers=auth_header(token))
+        resp = client.get("/api/admin/players/search?q=", headers=auth_header(token))
         assert resp.status_code == 200
         assert len(resp.json()) >= 1
 
@@ -285,7 +285,7 @@ class TestPlayerManagement:
         create_player_in_db(db, player_id=100, name="Old Name", position="Forward")
 
         resp = client.put(
-            "/admin/players/100",
+            "/api/admin/players/100",
             json={"name": "New Name", "position": "Midfielder"},
             headers=auth_header(token),
         )
@@ -303,7 +303,7 @@ class TestPlayerManagement:
         )
 
         resp = client.put(
-            "/admin/players/101",
+            "/api/admin/players/101",
             json={"position": "Defender"},
             headers=auth_header(token),
         )
@@ -319,7 +319,7 @@ class TestPlayerManagement:
         create_player_in_db(db, player_id=102, name="Date Test")
 
         resp = client.put(
-            "/admin/players/102",
+            "/api/admin/players/102",
             json={"date_of_birth": "not-a-date"},
             headers=auth_header(token),
         )
@@ -330,7 +330,7 @@ class TestPlayerManagement:
         token = _admin_token(client, db)
 
         resp = client.put(
-            "/admin/players/99999",
+            "/api/admin/players/99999",
             json={"name": "Ghost"},
             headers=auth_header(token),
         )

@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import {
   adminGetSuggested,
   adminGetUsers,
@@ -18,28 +16,18 @@ import {
 } from "../api/client";
 import type { Player } from "../types/player";
 import { loadSuggestedIds } from "../utils/storage";
+import { NavBar } from "./NavBar";
 import "./Dashboard.css";
 import "./AdminPage.css";
 
 type Tab = "suggested" | "users" | "players" | "data";
 
 export function AdminPage() {
-  const { user, logout } = useAuth();
   const [tab, setTab] = useState<Tab>("suggested");
 
   return (
     <div className="dashboard-page">
-      <nav className="dashboard-nav">
-        <Link to="/" className="dashboard-brand">⚽ Squad Builder</Link>
-        <div className="dashboard-nav-links">
-          <Link to="/builder">Builder</Link>
-          <Link to="/squads">My Squads</Link>
-          <Link to="/friends">Friends</Link>
-          <Link to="/admin" className="active">Admin</Link>
-          {user && <span className="dashboard-user">{user.display_name}</span>}
-          {user && <button className="dashboard-logout" onClick={logout}>Log out</button>}
-        </div>
-      </nav>
+      <NavBar active="admin" />
 
       <div className="dashboard-content">
         <h1>Admin Panel</h1>
@@ -86,7 +74,7 @@ function SuggestedTab() {
         setSuggested(s);
         setAllPlayers(p.players);
       })
-      .catch(() => {})
+      .catch((e) => setMsg(e instanceof Error ? e.message : "Failed to load data"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -199,7 +187,7 @@ function SuggestedTab() {
           <div key={s.player_id} className="admin-list-row">
             <span>{s.name}</span>
             <span className="admin-list-meta">{s.position}</span>
-            <button className="admin-remove-btn" onClick={() => togglePlayer(s as unknown as Player)}>
+            <button className="admin-remove-btn" onClick={() => togglePlayer({ ...s, date_of_birth: null } as Player)}>
               ✕
             </button>
           </div>
@@ -229,7 +217,7 @@ function UsersTab() {
   useEffect(() => {
     adminGetUsers()
       .then(setUsers)
-      .catch(() => {})
+      .catch((e) => setMsg(e instanceof Error ? e.message : "Failed to load users"))
       .finally(() => setLoading(false));
   }, []);
 

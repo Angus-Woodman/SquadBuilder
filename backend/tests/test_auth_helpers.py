@@ -80,22 +80,22 @@ class TestJWTTokens:
         assert exp > datetime.now(UTC)
 
     def test_decode_with_wrong_secret_raises(self):
-        from jose import jwt as jose_jwt
-        from jose.exceptions import JWTError
+        import jwt as pyjwt
+        from jwt.exceptions import InvalidTokenError
 
-        token = jose_jwt.encode(
+        token = pyjwt.encode(
             {"sub": "1", "role": "user", "exp": datetime.now(UTC) + timedelta(hours=1)},
             "wrong-secret",
             algorithm=_ALGORITHM,
         )
-        with pytest.raises(JWTError):
+        with pytest.raises(InvalidTokenError):
             decode_access_token(token)
 
     def test_decode_expired_token_raises(self):
-        from jose import jwt as jose_jwt
-        from jose.exceptions import ExpiredSignatureError
+        import jwt as pyjwt
+        from jwt.exceptions import ExpiredSignatureError
 
-        token = jose_jwt.encode(
+        token = pyjwt.encode(
             {
                 "sub": "1",
                 "role": "user",

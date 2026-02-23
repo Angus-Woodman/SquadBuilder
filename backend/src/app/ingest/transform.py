@@ -11,7 +11,7 @@ def _parse_date(value: str | None) -> date | None:
     try:
         yyyy, mm, dd = value.split("-")
         return date(int(yyyy), int(mm), int(dd))
-    except Exception:
+    except (ValueError, TypeError):
         return None
 
 
