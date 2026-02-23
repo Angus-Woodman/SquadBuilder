@@ -16,6 +16,7 @@ import {
 } from "../api/client";
 import type { Player } from "../types/player";
 import { loadSuggestedIds } from "../utils/storage";
+import { useAuth } from "../context/AuthContext";
 import { NavBar } from "./NavBar";
 import "./Dashboard.css";
 import "./AdminPage.css";
