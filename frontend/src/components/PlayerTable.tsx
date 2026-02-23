@@ -101,13 +101,26 @@ function PositionSection(props: {
       ) : (
         <div className="player-table-wrap">
           <table className="player-table">
+            <colgroup>
+              <col style={{ width: "48px" }} />
+              <col style={{ width: "40%" }} />
+              <col style={{ width: "25%" }} />
+              <col style={{ width: "25%" }} />
+              <col style={{ width: "48px" }} />
+            </colgroup>
             <thead>
               <tr>
                 <th></th>
                 <th>Name</th>
                 <th>Position</th>
                 <th>DOB</th>
-                <th title="Add or remove from your suggested list">★</th>
+                <th
+                  className="col-star"
+                  title="Add or remove from your suggested list"
+                  style={{ visibility: expanded ? "visible" : "hidden" }}
+                >
+                  ★
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -129,10 +142,11 @@ function PositionSection(props: {
                     <td>{p.name}</td>
                     <td>{p.position ?? "—"}</td>
                     <td>{p.date_of_birth ?? "—"}</td>
-                    <td>
+                    <td className="col-star" style={{ visibility: expanded ? "visible" : "hidden" }}>
                       <button
                         className={`suggest-btn${isSuggested ? " active" : ""}`}
                         onClick={() => props.onToggleSuggested(p.player_id)}
+                        disabled={!expanded}
                         title={isSuggested ? "Remove from suggested" : "Add to suggested"}
                       >
                         {isSuggested ? "★" : "☆"}

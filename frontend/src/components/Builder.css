@@ -134,6 +134,7 @@
 .player-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .player-table thead tr {
@@ -384,6 +385,11 @@
     background: rgba(0, 0, 0, 0.04);
     border-color: rgba(0, 0, 0, 0.2);
   }
+}
+
+/* Star column — right-aligned */
+.player-table .col-star {
+  text-align: right;
 }
 
 /* Suggest star button */
