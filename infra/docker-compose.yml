@@ -2,13 +2,23 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_DB: squad_builder
-      POSTGRES_USER: squad
-      POSTGRES_PASSWORD: squad
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - squad_builder_pg:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
 
 volumes:
   squad_builder_pg:

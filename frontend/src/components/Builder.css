@@ -212,6 +212,46 @@
   }
 }
 
+/* Player photo in table */
+.player-photo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.player-photo-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Clickable photo & name in table */
+.player-photo-clickable {
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.player-photo-clickable:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.4);
+}
+
+.player-name-clickable {
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.player-name-clickable:hover {
+  color: #60a5fa;
+}
+
+@media (prefers-color-scheme: light) {
+  .player-photo-placeholder {
+    background: rgba(0, 0, 0, 0.06);
+  }
+}
+
 /* ── Squad panel ─────────────────────────────────────── */
 .squad-panel {
   border: 1px solid rgba(255, 255, 255, 0.08);

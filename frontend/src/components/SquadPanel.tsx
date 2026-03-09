@@ -1,5 +1,7 @@
+import { useState } from "react";
 import type { Player } from "../types/player";
 import { GROUP_LABELS, type PositionGroup, positionGroup } from "../utils/positions";
+import { PlayerProfile } from "./PlayerProfile";
 
 export function SquadPanel(props: {
   squad: Player[];
@@ -7,6 +9,7 @@ export function SquadPanel(props: {
   maxSize?: number;
 }) {
   const max = props.maxSize ?? 26;
+  const [profilePlayer, setProfilePlayer] = useState<Player | null>(null);
 
   const grouped: Record<PositionGroup, Player[]> = {
     GK: [],
@@ -48,7 +51,12 @@ export function SquadPanel(props: {
                     .map((p) => (
                       <li key={p.player_id} className="squad-player">
                         <div style={{ minWidth: 0 }}>
-                          <div className="squad-player-name">{p.name}</div>
+                          <div
+                            className="squad-player-name player-name-clickable"
+                            onClick={() => setProfilePlayer(p)}
+                          >
+                            {p.name}
+                          </div>
                           <div className="squad-player-meta">
                             {p.position ?? "—"} · {p.nationality ?? "—"}
                           </div>
@@ -66,6 +74,13 @@ export function SquadPanel(props: {
             </div>
           ))}
         </div>
+      )}
+
+      {profilePlayer && (
+        <PlayerProfile
+          player={profilePlayer}
+          onClose={() => setProfilePlayer(null)}
+        />
       )}
     </div>
   );

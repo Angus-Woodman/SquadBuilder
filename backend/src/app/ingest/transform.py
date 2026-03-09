@@ -100,6 +100,8 @@ def transform_competition_teams_payload(
                 "position": p.get("position"),
                 "nationality": p.get("nationality"),
                 "date_of_birth": _parse_date(p.get("dateOfBirth")),
+                "club": team.get("name"),
+                "shirt_number": p.get("shirtNumber"),
             }
 
             # If we already saw the player, keep the first non-null values (very simple merge)

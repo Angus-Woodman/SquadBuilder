@@ -47,6 +47,8 @@ class TestGetPlayers:
             position="Forward",
             nationality="England",
             date_of_birth=date(1995, 6, 15),
+            club="Test FC",
+            shirt_number=9,
         )
 
         resp = client.get("/api/players")
@@ -56,6 +58,8 @@ class TestGetPlayers:
         assert player["position"] == "Forward"
         assert player["nationality"] == "England"
         assert player["date_of_birth"] == "1995-06-15"
+        assert player["club"] == "Test FC"
+        assert player["shirt_number"] == 9
 
     def test_get_players_filter_nationality(self, client, db):
         create_player_in_db(db, player_id=1, name="English", nationality="England")

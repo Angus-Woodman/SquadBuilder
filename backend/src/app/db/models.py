@@ -48,6 +48,22 @@ class Player(Base):
     position: Mapped[str | None] = mapped_column(String, nullable=True)
     nationality: Mapped[str | None] = mapped_column(String, nullable=True)
     date_of_birth: Mapped[date | None] = mapped_column(Date, nullable=True)
+    club: Mapped[str | None] = mapped_column(String, nullable=True)
+    shirt_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    photo_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    england_caps: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    england_goals: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    preferred_foot: Mapped[str | None] = mapped_column(String, nullable=True)
+    season_games: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    season_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    season_goals: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    season_assists: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    season_xg: Mapped[str | None] = mapped_column(String, nullable=True)
+    season_xa: Mapped[str | None] = mapped_column(String, nullable=True)
+    season_yellow_cards: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    season_red_cards: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    season_key_passes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    season_shots: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -56,6 +72,22 @@ class Player(Base):
             "position": self.position,
             "nationality": self.nationality,
             "date_of_birth": self.date_of_birth.isoformat() if self.date_of_birth else None,
+            "club": self.club,
+            "shirt_number": self.shirt_number,
+            "photo_url": self.photo_url,
+            "england_caps": self.england_caps,
+            "england_goals": self.england_goals,
+            "preferred_foot": self.preferred_foot,
+            "season_games": self.season_games,
+            "season_minutes": self.season_minutes,
+            "season_goals": self.season_goals,
+            "season_assists": self.season_assists,
+            "season_xg": self.season_xg,
+            "season_xa": self.season_xa,
+            "season_yellow_cards": self.season_yellow_cards,
+            "season_red_cards": self.season_red_cards,
+            "season_key_passes": self.season_key_passes,
+            "season_shots": self.season_shots,
         }
 
 

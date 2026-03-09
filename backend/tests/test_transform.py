@@ -57,6 +57,7 @@ def test_transform_competition_teams_payload_happy_path() -> None:
                 "position": "Goalkeeper",
                 "dateOfBirth": "1990-08-18",
                 "nationality": "England",
+                "shirtNumber": 1,
             },
             {
                 "id": 126870,
@@ -64,6 +65,7 @@ def test_transform_competition_teams_payload_happy_path() -> None:
                 "position": "Goalkeeper",
                 "dateOfBirth": "2002-08-18",
                 "nationality": "Netherlands",
+                "shirtNumber": 34,
             },
         ],
     )
@@ -87,9 +89,13 @@ def test_transform_competition_teams_payload_happy_path() -> None:
     assert players[0]["name"] == "Jason Steele"
     assert players[0]["nationality"] == "England"
     assert players[0]["date_of_birth"] == date(1990, 8, 18)
+    assert players[0]["club"] == "Brighton & Hove Albion FC"
+    assert players[0]["shirt_number"] == 1
 
     assert players[1]["player_id"] == 126870
     assert players[1]["date_of_birth"] == date(2002, 8, 18)
+    assert players[1]["club"] == "Brighton & Hove Albion FC"
+    assert players[1]["shirt_number"] == 34
 
     links = sorted(out["team_players"], key=lambda x: x["player_id"])
     assert links == [{"team_id": 397, "player_id": 4040}, {"team_id": 397, "player_id": 126870}]

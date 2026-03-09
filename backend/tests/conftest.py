@@ -153,6 +153,9 @@ def create_player_in_db(
     position: str | None = "Forward",
     nationality: str | None = "England",
     date_of_birth: date | None = None,
+    club: str | None = None,
+    shirt_number: int | None = None,
+    photo_url: str | None = None,
 ) -> None:
     """Insert a player row directly into the database."""
     from app.db.models import Player
@@ -164,6 +167,9 @@ def create_player_in_db(
             position=position,
             nationality=nationality,
             date_of_birth=date_of_birth,
+            club=club,
+            shirt_number=shirt_number,
+            photo_url=photo_url,
         )
     )
     db.commit()

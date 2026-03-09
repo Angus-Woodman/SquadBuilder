@@ -5,6 +5,7 @@ import {
   type PositionGroup,
   positionGroup,
 } from "../utils/positions";
+import { PlayerProfile } from "./PlayerProfile";
 
 export function PlayerTable(props: {
   players: Player[];
@@ -15,6 +16,7 @@ export function PlayerTable(props: {
   disabledAdd?: boolean;
 }) {
   const groupOrder: PositionGroup[] = ["GK", "DEF", "MID", "FWD", "OTHER"];
+  const [profilePlayer, setProfilePlayer] = useState<Player | null>(null);
 
   // Group players by position
   const grouped: Record<PositionGroup, Player[]> = {
@@ -48,9 +50,17 @@ export function PlayerTable(props: {
             onAdd={props.onAdd}
             onToggleSuggested={props.onToggleSuggested}
             disabledAdd={props.disabledAdd}
+            onOpenProfile={setProfilePlayer}
           />
         );
       })}
+
+      {profilePlayer && (
+        <PlayerProfile
+          player={profilePlayer}
+          onClose={() => setProfilePlayer(null)}
+        />
+      )}
     </div>
   );
 }
@@ -63,6 +73,7 @@ function PositionSection(props: {
   suggestedIds: Set<number>;
   onAdd: (p: Player) => void;
   onToggleSuggested: (playerId: number) => void;
+  onOpenProfile: (p: Player) => void;
   disabledAdd?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -103,17 +114,23 @@ function PositionSection(props: {
           <table className="player-table">
             <colgroup>
               <col style={{ width: "48px" }} />
-              <col style={{ width: "40%" }} />
-              <col style={{ width: "25%" }} />
-              <col style={{ width: "25%" }} />
+              <col style={{ width: "40px" }} />
+              <col style={{ width: "28%" }} />
+              <col style={{ width: "18%" }} />
+              <col style={{ width: "18%" }} />
+              <col style={{ width: "15%" }} />
+              <col style={{ width: "48px" }} />
               <col style={{ width: "48px" }} />
             </colgroup>
             <thead>
               <tr>
                 <th></th>
+                <th></th>
                 <th>Name</th>
+                <th>Club</th>
                 <th>Position</th>
                 <th>DOB</th>
+                <th title="Shirt number">#</th>
                 <th
                   className="col-star"
                   title="Add or remove from your suggested list"
@@ -139,9 +156,31 @@ function PositionSection(props: {
                         {already ? "✓" : "+"}
                       </button>
                     </td>
-                    <td>{p.name}</td>
+                    <td>
+                      {p.photo_url ? (
+                        <img
+                          src={p.photo_url}
+                          alt={p.name}
+                          className="player-photo player-photo-clickable"
+                          onClick={() => props.onOpenProfile(p)}
+                        />
+                      ) : (
+                        <div
+                          className="player-photo-placeholder player-photo-clickable"
+                          onClick={() => props.onOpenProfile(p)}
+                        />
+                      )}
+                    </td>
+                    <td
+                      className="player-name-clickable"
+                      onClick={() => props.onOpenProfile(p)}
+                    >
+                      {p.name}
+                    </td>
+                    <td>{p.club ?? "—"}</td>
                     <td>{p.position ?? "—"}</td>
                     <td>{p.date_of_birth ?? "—"}</td>
+                    <td>{p.shirt_number ?? "—"}</td>
                     <td className="col-star" style={{ visibility: expanded ? "visible" : "hidden" }}>
                       <button
                         className={`suggest-btn${isSuggested ? " active" : ""}`}
