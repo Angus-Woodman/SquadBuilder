@@ -30,9 +30,6 @@ export function PlayerProfile(props: {
             <div className="profile-subtitle">
               {[p.position, p.club].filter(Boolean).join(" · ") || "—"}
             </div>
-            {p.shirt_number != null && (
-              <span className="profile-shirt">#{p.shirt_number}</span>
-            )}
           </div>
         </div>
 

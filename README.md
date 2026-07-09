@@ -115,17 +115,16 @@ make db-down
 
 ## Running the Backend
 
-Start API:
+Start the backend development environment (database + API):
+
+```bash
+make backend-dev
+```
+
+If you only want to start the API and not the database:
 
 ```bash
 make backend-api
-```
-
-or manually:
-
-```bash
-cd backend
-uv run uvicorn app.api.main:app --reload
 ```
 
 Runs on:
@@ -144,10 +143,18 @@ http://127.0.0.1:8000/docs
 
 ## Running the Frontend
 
+Start the frontend development server:
+
+```bash
+make frontend-dev
+```
+
+Or manually:
+
 ```bash
 cd frontend
 pnpm install
-pnpm dev
+pnpm run dev
 ```
 
 Runs on:
@@ -184,10 +191,22 @@ Stop database:
 make db-down
 ```
 
-Run backend:
+Run backend API only:
 
 ```bash
 make backend-api
+```
+
+Run backend development environment (database + API):
+
+```bash
+make backend-dev
+```
+
+Run frontend development server:
+
+```bash
+make frontend-dev
 ```
 
 Run tests:
@@ -225,20 +244,19 @@ uv run pytest -v
 Terminal 1:
 
 ```bash
-make db-up
+make backend-dev
 ```
 
 Terminal 2:
 
 ```bash
-make backend-api
+make frontend-dev
 ```
 
-Terminal 3:
+If you want to manage the database separately, use:
 
 ```bash
-cd frontend
-pnpm dev
+make db-up
 ```
 
 ---

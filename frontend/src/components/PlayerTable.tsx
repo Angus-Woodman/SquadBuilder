@@ -120,7 +120,6 @@ function PositionSection(props: {
               <col style={{ width: "18%" }} />
               <col style={{ width: "15%" }} />
               <col style={{ width: "48px" }} />
-              <col style={{ width: "48px" }} />
             </colgroup>
             <thead>
               <tr>
@@ -130,7 +129,6 @@ function PositionSection(props: {
                 <th>Club</th>
                 <th>Position</th>
                 <th>DOB</th>
-                <th title="Shirt number">#</th>
                 <th
                   className="col-star"
                   title="Add or remove from your suggested list"
@@ -180,7 +178,6 @@ function PositionSection(props: {
                     <td>{p.club ?? "—"}</td>
                     <td>{p.position ?? "—"}</td>
                     <td>{p.date_of_birth ?? "—"}</td>
-                    <td>{p.shirt_number ?? "—"}</td>
                     <td className="col-star" style={{ visibility: expanded ? "visible" : "hidden" }}>
                       <button
                         className={`suggest-btn${isSuggested ? " active" : ""}`}
