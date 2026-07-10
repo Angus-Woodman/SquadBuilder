@@ -88,12 +88,17 @@ Example:
 
 ```env
 DATABASE_URL=postgresql+psycopg://squad:squad@localhost:5432/squad_builder
+JWT_SECRET_KEY=your_jwt_secret_key_here
 FOOTBALL_DATA_API_TOKEN=your_api_key_here
+ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+AUTO_CREATE_TABLES=1
 ```
 
 Get API key:
 
 https://www.football-data.org/
+
+> For Azure deployment, these environment variables can be stored in Azure App Service configuration or Azure Key Vault references.
 
 ---
 
@@ -258,6 +263,39 @@ If you want to manage the database separately, use:
 ```bash
 make db-up
 ```
+
+---
+
+## Azure Deployment Notes
+
+This project is prepared for Azure deployment with the following patterns:
+
+- Frontend: Azure Static Web Apps
+- Backend: Azure App Service
+- Database: Azure Database for PostgreSQL
+- Secrets: Azure Key Vault / App Service configuration
+- CI/CD: GitHub Actions
+
+The backend now supports these runtime variables:
+
+- `ALLOWED_ORIGINS`: comma-separated list of permitted CORS origins
+- `AUTO_CREATE_TABLES`: set to `0` or `false` in production to disable automatic schema creation
+- `JWT_SECRET_KEY`: secret for signing JWT access tokens
+- `DATABASE_URL`: connection string for PostgreSQL
+- `FOOTBALL_DATA_API_TOKEN`: external API token for refresh operations
+
+The frontend now supports a build-time API base URL via:
+
+```bash
+VITE_API_BASE=https://<your-backend-host>
+```
+
+GitHub Actions workflows are included in `.github/workflows/`:
+
+- `ci.yml` for backend tests and frontend build verification
+- `azure-deploy.yml` for Azure Static Web Apps + App Service deployment
+
+> On Azure, keep secrets out of source control and use GitHub Secrets or Key Vault references instead.
 
 ---
 

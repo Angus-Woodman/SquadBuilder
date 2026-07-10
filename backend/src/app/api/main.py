@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
@@ -20,6 +21,24 @@ from app.db.session import get_db
 from app.rate_limit import limiter
 
 
+def _parse_csv(value: str | None) -> list[str]:
+    if not value:
+        return []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def get_allowed_origins() -> list[str]:
+    origins = os.getenv("ALLOWED_ORIGINS")
+    if origins:
+        return _parse_csv(origins)
+    return ["http://localhost:5173", "http://127.0.0.1:5173"]
+
+
+def should_create_tables() -> bool:
+    value = os.getenv("AUTO_CREATE_TABLES", "1").strip().lower()
+    return value not in ("0", "false", "no", "off", "")
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     """Load backend/.env for local dev.
@@ -27,10 +46,11 @@ async def lifespan(_app: FastAPI):
     backend_dir = Path(__file__).resolve().parents[3]  # .../backend
     load_dotenv(backend_dir / ".env")
 
-    # Auto-create tables on startup (dev convenience)
-    from app.db.bootstrap import create_tables
+    if should_create_tables():
+        from app.db.bootstrap import create_tables
 
-    create_tables()
+        create_tables()
+
     yield
 
 
@@ -51,7 +71,7 @@ async def _rate_limit_handler(request: Request, exc: RateLimitExceeded):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

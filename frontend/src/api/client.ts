@@ -2,7 +2,7 @@ import type { PlayersResponse } from "../types/player";
 
 // ── Base URL prefix ──────────────────────────────────────────────────
 
-const API = "/api";
+const API = import.meta.env.VITE_API_BASE ?? "/api";
 
 // ── Token management ─────────────────────────────────────────────────
 
