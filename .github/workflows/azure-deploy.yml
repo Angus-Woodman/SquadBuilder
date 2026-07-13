@@ -22,19 +22,20 @@ jobs:
   deploy-infra:
     runs-on: ubuntu-latest
     outputs:
-      backend-url: ${{ steps.backend_url.outputs.backend_url }}
+      backend-url: ${{ steps.infra_deploy.outputs.backend_url }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Login to Azure
-        uses: azure/login@v1
+        uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy Azure infrastructure with Bicep
+        id: infra_deploy
         run: |
-          az deployment group create \
+          backend_url=$(az deployment group create \
             --resource-group "$RESOURCE_GROUP" \
             --name infra-deploy \
             --template-file "$BICEP_FILE" \
@@ -43,15 +44,9 @@ jobs:
               jwtSecretKey="${{ secrets.JWT_SECRET_KEY }}" \
               footballDataApiToken="${{ secrets.FOOTBALL_DATA_API_TOKEN }}" \
               databaseUrl="${{ secrets.DATABASE_URL }}" \
-              allowedOrigins="${{ secrets.ALLOWED_ORIGINS }}"
-
-      - name: Get backend URL
-        id: backend_url
-        run: |
-          echo "backend_url=$(az deployment group show \
-            --resource-group '$RESOURCE_GROUP' \
-            --name infra-deploy \
-            --query properties.outputs.backendAppUrl.value -o tsv)" >> $GITHUB_OUTPUT
+              allowedOrigins="${{ secrets.ALLOWED_ORIGINS }}" \
+            --query properties.outputs.backendAppUrl.value -o tsv)
+          echo "backend_url=${backend_url}" >> $GITHUB_OUTPUT
 
   deploy-frontend:
     runs-on: ubuntu-latest
@@ -60,7 +55,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -68,12 +63,12 @@ jobs:
           node-version: "22"
 
       - name: Build frontend
+        working-directory: frontend
         env:
           BACKEND_URL: ${{ needs.deploy-infra.outputs.backend-url }}
         run: |
           corepack enable
-          pnpm install
-          cd frontend
+          pnpm install --frozen-lockfile
           VITE_API_BASE="${BACKEND_URL}/api" pnpm build
 
       - name: Deploy frontend to Azure Static Web Apps
@@ -93,10 +88,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Login to Azure
-        uses: azure/login@v1
+        uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
