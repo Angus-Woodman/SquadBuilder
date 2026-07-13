@@ -1,0 +1,6 @@
+# pnpm workspace settings: explicitly allow esbuild build script for CI
+packages:
+  - "."
+
+allowBuilds:
+  esbuild@0.27.3: true
