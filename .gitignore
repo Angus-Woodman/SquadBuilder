@@ -17,6 +17,7 @@ infra/.env
 
 # Node
 node_modules/
+frontend/dist/
 
 # OS
 .DS_Store

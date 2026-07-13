@@ -43,6 +43,69 @@ Built with a modern Python backend, PostgreSQL database, and React frontend.
 
 - Docker
 - Docker Compose
+- Azure Bicep deployment for backend and frontend infrastructure
+- Backend is deployed to App Service with Python 3.12 runtime; the local Dockerfile remains available for future container-based deployment
+
+---
+
+## Azure Deployment
+
+The deployed application is live at:
+
+- Frontend: `https://lively-wave-0ed7cbc10.7.azurestaticapps.net`
+- Backend API: `https://squadbuilder-backend-ukwest.azurewebsites.net`
+- Health endpoint: `https://squadbuilder-backend-ukwest.azurewebsites.net/api/health`
+
+### Production architecture
+
+- React/Vite frontend on Azure Static Web Apps
+- FastAPI backend on Azure App Service
+- PostgreSQL storage on Azure Database for PostgreSQL Flexible Server
+- Application Insights for backend monitoring
+- GitHub Actions for infrastructure provisioning and deployment
+
+### Azure services used
+
+- Azure Resource Group
+- Azure App Service Plan (Linux) in UK West
+- Azure App Service (backend) in UK West
+- Azure Database for PostgreSQL Flexible Server in UK West
+- Azure Static Web Apps in Central US
+- Application Insights in UK West
+
+> Static Web Apps is deployed in Central US because the preferred European regions were unavailable to this subscription at deployment time.
+
+### Infrastructure-as-code
+
+- `infra/main.bicep` defines backend App Service, Static Web App, App Insights, and runtime settings.
+- `infra/main.parameters.json` contains placeholder deployment parameters.
+- `.github/workflows/azure-deploy.yml` provisions Azure resources and deploys the frontend and backend.
+
+### Deployment prerequisites
+
+Required GitHub secrets for production deployment:
+
+- `AZURE_CREDENTIALS`
+- `AZURE_STATIC_WEB_APPS_API_TOKEN`
+- `JWT_SECRET_KEY`
+- `FOOTBALL_DATA_API_TOKEN`
+- `DATABASE_URL`
+- `ALLOWED_ORIGINS`
+
+### Deploy via GitHub Actions
+
+- Pushes to `main` deploy infrastructure and both applications.
+- Manual workflow runs can deploy infrastructure only, or deploy both apps when
+  `deploy_apps=true`.
+- The frontend build receives the backend URL from the infra job and sets
+  `VITE_API_BASE` to `${BACKEND_URL}/api`.
+- The backend deploy uses Azure login and `azure/webapps-deploy@v3` with
+  `app-name`, so it does not require a publish profile.
+- The deployment is safe to rerun without deleting production database data.
+
+### Local deployment guidance
+
+For development, continue using `make backend-dev` and `make frontend-dev`.
 
 ---
 
@@ -268,49 +331,76 @@ make db-up
 
 ## Azure Deployment Notes
 
-This project is prepared for Azure deployment with the following patterns:
+The current production deployment uses the following architecture:
 
-- Frontend: Azure Static Web Apps
-- Backend: Azure App Service
-- Database: Azure Database for PostgreSQL
-- Secrets: Azure Key Vault / App Service configuration
-- CI/CD: GitHub Actions
+- Frontend: Azure Static Web Apps (Central US)
+- Backend: Azure App Service (UK West)
+- Database: Azure Database for PostgreSQL Flexible Server (UK West)
+- Application Insights: UK West
+- CI/CD: GitHub Actions with infrastructure provisioning and app deployment
 
-The backend now supports these runtime variables:
+### Runtime configuration
 
-- `ALLOWED_ORIGINS`: comma-separated list of permitted CORS origins
-- `AUTO_CREATE_TABLES`: set to `0` or `false` in production to disable automatic schema creation
-- `JWT_SECRET_KEY`: secret for signing JWT access tokens
-- `DATABASE_URL`: connection string for PostgreSQL
-- `FOOTBALL_DATA_API_TOKEN`: external API token for refresh operations
+The backend reads production configuration from App Service settings:
 
-The frontend now supports a build-time API base URL via:
+- `DATABASE_URL`
+- `JWT_SECRET_KEY`
+- `FOOTBALL_DATA_API_TOKEN`
+- `ALLOWED_ORIGINS`
+- `AUTO_CREATE_TABLES`
+
+The frontend build receives the backend base URL at build time through:
 
 ```bash
-VITE_API_BASE=https://<your-backend-host>
+VITE_API_BASE=https://squadbuilder-backend-ukwest.azurewebsites.net/api
 ```
 
-GitHub Actions workflows are included in `.github/workflows/`:
+### Workflow behavior
 
-- `ci.yml` for backend tests and frontend build verification
-- `azure-deploy.yml` for Azure Static Web Apps + App Service deployment
+- `main` pushes deploy infrastructure and both applications.
+- Manual workflow runs can deploy infrastructure only or deploy infrastructure
+  plus apps when `deploy_apps=true`.
+- The backend deploy does not rely on a publish profile; it uses Azure login
+  credentials from `AZURE_CREDENTIALS`.
+- The deployment is designed to preserve the production database and not
+  recreate or delete data.
 
-> On Azure, keep secrets out of source control and use GitHub Secrets or Key Vault references instead.
+### Secrets required
+
+- `AZURE_CREDENTIALS`
+- `AZURE_STATIC_WEB_APPS_API_TOKEN`
+- `JWT_SECRET_KEY`
+- `FOOTBALL_DATA_API_TOKEN`
+- `DATABASE_URL`
+- `ALLOWED_ORIGINS`
+
+> Do not store production secrets in source control.
 
 ---
+
+## Future improvements
+
+Realistic next steps:
+
+- Replace `AUTO_CREATE_TABLES` with Alembic-based database migrations.
+- Add a manually triggered reference-data seeding workflow for refresh jobs.
+- Move GitHub Actions to Azure OIDC authentication instead of stored service principal credentials.
+- Add real OpenTelemetry/Application Insights instrumentation to backend request traces.
+- Support an optional custom domain for the Static Web App.
+- Add a secure admin-management command for admin user onboarding and role management.
 
 ## Example API Usage
 
 Get players:
 
 ```bash
-curl "http://127.0.0.1:8000/players?nationality=England"
+curl "http://127.0.0.1:8000/api/players?nationality=England"
 ```
 
 Refresh data:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/refresh \
+curl -X POST http://127.0.0.1:8000/api/refresh \
 -H "Content-Type: application/json" \
 -d '{"competition":["PL"]}'
 ```
@@ -318,7 +408,7 @@ curl -X POST http://127.0.0.1:8000/refresh \
 Health check:
 
 ```bash
-curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/api/health
 ```
 
 ---

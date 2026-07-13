@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "ukwest"
+    },
+    "appServicePlanName": {
+      "value": "squadbuilder-plan-ukwest"
+    },
+    "backendAppName": {
+      "value": "squadbuilder-backend-ukwest"
+    },
+    "staticWebAppName": {
+      "value": "squadbuilder-frontend-ukwest"
+    },
+    "staticWebAppLocation": {
+      "value": "centralus"
+    },
+    "postgresServerName": {
+      "value": "squadbuilder-postgres"
+    },
+    "jwtSecretKey": {
+      "value": "<JWT_SECRET_KEY>"
+    },
+    "footballDataApiToken": {
+      "value": "<FOOTBALL_DATA_API_TOKEN>"
+    },
+    "allowedOrigins": {
+      "value": "https://<your-static-webapp-hostname>"
+    }
+  }
+}

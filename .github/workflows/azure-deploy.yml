@@ -4,26 +4,72 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      deploy_apps:
+        description: 'Deploy frontend and backend applications (requires infrastructure to exist)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  RESOURCE_GROUP: squad-builder-rg
+  BICEP_FILE: infra/main.bicep
+  BICEP_PARAMETERS: infra/main.parameters.json
+  FRONTEND_APP_LOCATION: frontend
+  FRONTEND_OUTPUT_LOCATION: frontend/dist
 
 jobs:
+  deploy-infra:
+    runs-on: ubuntu-latest
+    outputs:
+      backend-url: ${{ steps.infra_deploy.outputs.backend_url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Login to Azure
+        uses: azure/login@v3
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Azure infrastructure with Bicep
+        id: infra_deploy
+        run: |
+          backend_url=$(az deployment group create \
+            --resource-group "$RESOURCE_GROUP" \
+            --name infra-deploy \
+            --template-file "$BICEP_FILE" \
+            --parameters @"$BICEP_PARAMETERS" \
+            --parameters \
+              jwtSecretKey="${{ secrets.JWT_SECRET_KEY }}" \
+              footballDataApiToken="${{ secrets.FOOTBALL_DATA_API_TOKEN }}" \
+              databaseUrl="${{ secrets.DATABASE_URL }}" \
+              allowedOrigins="${{ secrets.ALLOWED_ORIGINS }}" \
+            --query properties.outputs.backendAppUrl.value -o tsv)
+          echo "backend_url=${backend_url}" >> $GITHUB_OUTPUT
+
   deploy-frontend:
     runs-on: ubuntu-latest
+    needs: deploy-infra
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy_apps == true)
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Build frontend
+        working-directory: frontend
+        env:
+          BACKEND_URL: ${{ needs.deploy-infra.outputs.backend-url }}
         run: |
           corepack enable
-          pnpm install
-          cd frontend
-          pnpm build
+          pnpm install --frozen-lockfile
+          VITE_API_BASE="${BACKEND_URL}/api" pnpm build
 
       - name: Deploy frontend to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
@@ -31,26 +77,27 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "frontend"
+          app_location: "frontend/dist"
           api_location: ""
-          output_location: "frontend/dist"
+          output_location: ""
+          skip_app_build: true
 
   deploy-backend:
     runs-on: ubuntu-latest
-    needs: deploy-frontend
+    needs: deploy-infra
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy_apps == true)
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Login to Azure
-        uses: azure/login@v1
+        uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy backend to Azure App Service
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          app-name: squadbuilder-backend-ukwest
           package: ./backend

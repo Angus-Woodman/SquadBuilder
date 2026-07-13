@@ -1,4 +1,4 @@
 [tools]
 python = "3.12"
-node = "20"
-pnpm = "10"
+node = "22"
+pnpm = "11.12.0"
