@@ -141,7 +141,7 @@ resource backendApp 'Microsoft.Web/sites@2022-03-01' = {
   ]
 }
 
-resource staticWebApp 'Microsoft.Web/staticSites@2023-08-01' = {
+resource staticWebApp 'Microsoft.Web/staticSites@2025-05-01' = {
   name: staticWebAppName
   location: staticWebAppLocation
   sku: {
