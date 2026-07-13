@@ -5,9 +5,51 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+env:
+  RESOURCE_GROUP: squad-builder-rg
+  BICEP_FILE: infra/main.bicep
+  BICEP_PARAMETERS: infra/main.parameters.json
+  FRONTEND_APP_LOCATION: frontend
+  FRONTEND_OUTPUT_LOCATION: frontend/dist
+
 jobs:
+  deploy-infra:
+    runs-on: ubuntu-latest
+    outputs:
+      backend-url: ${{ steps.backend_url.outputs.backend_url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Azure infrastructure with Bicep
+        run: |
+          az deployment group create \
+            --resource-group "$RESOURCE_GROUP" \
+            --name infra-deploy \
+            --template-file "$BICEP_FILE" \
+            --parameters @"$BICEP_PARAMETERS" \
+            --parameters \
+              jwtSecretKey="${{ secrets.JWT_SECRET_KEY }}" \
+              footballDataApiToken="${{ secrets.FOOTBALL_DATA_API_TOKEN }}" \
+              databaseUrl="${{ secrets.DATABASE_URL }}" \
+              allowedOrigins="${{ secrets.ALLOWED_ORIGINS }}"
+
+      - name: Get backend URL
+        id: backend_url
+        run: |
+          echo "backend_url=$(az deployment group show \
+            --resource-group '$RESOURCE_GROUP' \
+            --name infra-deploy \
+            --query properties.outputs.backendAppUrl.value -o tsv)" >> $GITHUB_OUTPUT
+
   deploy-frontend:
     runs-on: ubuntu-latest
+    needs: deploy-infra
 
     steps:
       - name: Checkout code
@@ -19,11 +61,13 @@ jobs:
           node-version: "20"
 
       - name: Build frontend
+        env:
+          BACKEND_URL: ${{ needs.deploy-infra.outputs.backend-url }}
         run: |
           corepack enable
           pnpm install
           cd frontend
-          pnpm build
+          VITE_API_BASE="${BACKEND_URL}/api" pnpm build
 
       - name: Deploy frontend to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
@@ -31,13 +75,13 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "frontend"
+          app_location: "${{ env.FRONTEND_APP_LOCATION }}"
           api_location: ""
-          output_location: "frontend/dist"
+          output_location: "${{ env.FRONTEND_OUTPUT_LOCATION }}"
 
   deploy-backend:
     runs-on: ubuntu-latest
-    needs: deploy-frontend
+    needs: deploy-infra
 
     steps:
       - name: Checkout code
@@ -51,6 +95,5 @@ jobs:
       - name: Deploy backend to Azure App Service
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ./backend

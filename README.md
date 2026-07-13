@@ -43,6 +43,53 @@ Built with a modern Python backend, PostgreSQL database, and React frontend.
 
 - Docker
 - Docker Compose
+- Azure Bicep deployment for backend and frontend infrastructure
+- Backend is deployed to App Service with Python 3.12 runtime; the local Dockerfile remains available for future container-based deployment
+
+---
+
+## Azure Deployment
+
+This repository now includes Azure infrastructure-as-code in `infra/main.bicep` and `infra/main.parameters.json`.
+
+The deployment is designed to create:
+
+- Azure App Service Plan (Linux) for the FastAPI backend
+- Azure App Service for the backend
+- Azure Static Web App for the React frontend
+- Application Insights for backend telemetry
+- App Service configuration for database and auth secrets
+- HTTPS enforcement and a backend health check at `/api/health`
+
+### Deployment files
+
+- `infra/main.bicep` — infrastructure definition
+- `infra/main.parameters.json` — placeholder deployment parameters
+- `.github/workflows/azure-deploy.yml` — GitHub Actions workflow for Bicep provisioning and app deploy
+
+### Deployment prerequisites
+
+You will need:
+
+- `AZURE_CREDENTIALS` as a GitHub secret for service principal login
+- `JWT_SECRET_KEY` as a GitHub secret
+- `FOOTBALL_DATA_API_TOKEN` as a GitHub secret
+- `POSTGRES_ADMIN_PASSWORD` as a GitHub secret
+- `ALLOWED_ORIGINS` as a GitHub secret (set to your static web app URL)
+- `AZURE_STATIC_WEB_APPS_API_TOKEN` as a GitHub secret
+- `AZURE_WEBAPP_PUBLISH_PROFILE` as a GitHub secret
+
+### Deploy via GitHub Actions
+
+Push to `main` or run the workflow manually. The workflow will:
+
+1. Create or update Azure resources with Bicep
+2. Build and deploy the React frontend to Azure Static Web Apps
+3. Deploy the FastAPI backend to Azure App Service
+
+### Local deployment guidance
+
+For development, continue using `make backend-dev` and `make frontend-dev`.
 
 ---
 
