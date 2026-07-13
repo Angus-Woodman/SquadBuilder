@@ -43,6 +43,9 @@ param staticWebAppApiLocation string = ''
 @description('Build output location for the frontend.')
 param staticWebAppOutputLocation string = 'frontend/dist'
 
+@description('Location for the Static Web App (use centralus if Static Web Apps is not available in the primary region)')
+param staticWebAppLocation string = 'centralus'
+
 @description('App Service SKU for the backend plan.')
 param appServiceSkuName string = 'B1'
 
@@ -140,7 +143,7 @@ resource backendApp 'Microsoft.Web/sites@2022-03-01' = {
 
 resource staticWebApp 'Microsoft.Web/staticSites@2023-08-01' = {
   name: staticWebAppName
-  location: location
+  location: staticWebAppLocation
   sku: {
     name: staticWebAppSkuName
     tier: staticWebAppSkuTier

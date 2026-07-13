@@ -14,6 +14,9 @@
     "staticWebAppName": {
       "value": "squadbuilder-frontend-ukwest"
     },
+    "staticWebAppLocation": {
+      "value": "centralus"
+    },
     "postgresServerName": {
       "value": "squadbuilder-postgres"
     },
