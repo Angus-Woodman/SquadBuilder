@@ -24,7 +24,7 @@ jobs:
       - name: Install backend dependencies
         working-directory: backend
         run: |
-          uv sync --frozen --group dev
+          uv sync --frozen
 
       - name: Run backend tests
         working-directory: backend
