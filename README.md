@@ -77,7 +77,7 @@ You will need:
 - `POSTGRES_ADMIN_PASSWORD` as a GitHub secret
 - `ALLOWED_ORIGINS` as a GitHub secret (set to your static web app URL)
 - `AZURE_STATIC_WEB_APPS_API_TOKEN` as a GitHub secret
-- `AZURE_WEBAPP_PUBLISH_PROFILE` as a GitHub secret
+
 
 ### Deploy via GitHub Actions
 
