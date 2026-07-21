@@ -101,6 +101,50 @@ def main() -> None:
         help="Skip players that already have a preferred_foot value",
     )
 
+    sofascore_cmd = sub.add_parser(
+        "sofascore-squad",
+        help="Fetch squad data from SofaScore for a specific team",
+    )
+    sofascore_cmd.add_argument(
+        "--team",
+        "-t",
+        required=True,
+        help="Team slug (e.g., 'chelsea', 'manchester-city')",
+    )
+    sofascore_cmd.add_argument(
+        "--team-id",
+        type=int,
+        default=None,
+        help="Optional SofaScore team ID (e.g., 38 for Chelsea). Auto-lookup for common teams.",
+    )
+    sofascore_cmd.add_argument(
+        "--use-playwright",
+        action="store_true",
+        help="Use Playwright browser automation (default method)",
+    )
+    sofascore_cmd.add_argument(
+        "--use-selenium",
+        action="store_true",
+        help="Use Selenium browser automation instead of Playwright",
+    )
+    sofascore_cmd.add_argument(
+        "--chromedriver",
+        type=str,
+        default="/usr/local/bin/chromedriver",
+        help="Path to ChromeDriver executable (for Selenium)",
+    )
+    sofascore_cmd.add_argument(
+        "--delay",
+        type=float,
+        default=1.0,
+        help="Seconds to wait after page load (default: 1.0)",
+    )
+    sofascore_cmd.add_argument(
+        "--show-browser",
+        action="store_true",
+        help="Show the browser window (not headless) - Playwright only",
+    )
+
     args = parser.parse_args()
 
     if args.command == "refresh":
@@ -288,6 +332,49 @@ def main() -> None:
             f"Done: {total_found} players enriched, {total_updated} rows updated "
             f"(of {len(player_dicts)} players)"
         )
+
+    elif args.command == "sofascore-squad":
+        from app.ingest.sofascore import (
+            fetch_sofascore_squad,
+            fetch_sofascore_squad_with_playwright,
+            fetch_sofascore_squad_with_selenium,
+        )
+
+        # Determine which method to use
+        use_playwright = args.use_playwright or (not args.use_selenium)  # Playwright is default
+
+        if use_playwright:
+            print("Using Playwright browser automation...")
+            players = fetch_sofascore_squad_with_playwright(
+                args.team,
+                team_id=args.team_id,
+                delay=args.delay,
+                headless=not args.show_browser,
+            )
+        elif args.use_selenium:
+            print("Using Selenium browser automation...")
+            players = fetch_sofascore_squad_with_selenium(
+                args.team,
+                team_id=args.team_id,
+                delay=args.delay,
+                chromedriver_path=args.chromedriver,
+            )
+        else:
+            # Fallback to basic HTTP (won't work, will show info)
+            players = fetch_sofascore_squad(args.team, delay=args.delay)
+
+        if not players:
+            print(f"No players found for team '{args.team}'.")
+            return
+
+        print(f"\nFound {len(players)} players:\n")
+        for i, player in enumerate(players, 1):
+            name = player.get("name", "Unknown")
+            pos = player.get("position", "N/A")
+            num = player.get("shirt_number", "N/A")
+            print(f"{i:2d}. {name:30s} | Pos: {pos:10s} | #: {num}")
+
+        print(f"\nTotal: {len(players)} players")
 
 
 if __name__ == "__main__":
